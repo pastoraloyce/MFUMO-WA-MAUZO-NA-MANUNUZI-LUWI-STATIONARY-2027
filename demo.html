@@ -1,0 +1,2644 @@
+<!DOCTYPE html>
+<html lang="sw" class="h-full bg-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUWI STATIONERY MANAGEMENT SYSTEM</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: {
+              800: '#1E293B',
+              900: '#0F172A',
+              950: '#0A0F1D'
+            },
+            gold: {
+              400: '#FBBF24',
+              500: '#F59E0B',
+              600: '#D97706',
+              700: '#B45309'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- SheetJS (XLSX) CDN for Excel Export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-area, #printable-area * {
+        visibility: visible;
+      }
+      #printable-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 10px;
+        background: white !important;
+        color: black !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    .font-scale-sm { font-size: 0.875rem; }
+    .font-scale-base { font-size: 1rem; }
+    .font-scale-lg { font-size: 1.125rem; }
+  </style>
+</head>
+<body class="h-full text-slate-800 antialiased flex flex-col font-scale-base transition-all duration-200">
+
+  <!-- APP CONTAINER & LOGIN SCREEN WRAPPER -->
+  <div id="app" class="min-h-screen flex flex-col">
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- VIEW 1: AUTHENTICATION / LOGIN MODAL SCREEN -->
+    <div id="login-view" class="fixed inset-0 z-50 bg-navy-950 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-navy-950 to-navy-950"></div>
+      
+      <div class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 border border-slate-700/30">
+        <div class="text-center mb-6">
+          <div id="login-logo-preview" class="w-16 h-16 bg-gradient-to-tr from-gold-600 to-gold-400 rounded-2xl flex items-center justify-center font-black text-slate-950 text-3xl shadow-lg mx-auto mb-3">
+            L
+          </div>
+          <h1 class="text-2xl font-black text-navy-900 tracking-wide">LUWI STATIONERY</h1>
+          <p class="text-xs font-bold text-gold-600 uppercase tracking-widest mt-0.5">Mfumo wa Kusimamia Biashara</p>
+          <p class="text-xs text-slate-500 mt-1">Ingia kwenye mfumo kuanza kazi</p>
+        </div>
+
+        <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Jina la Mtumiaji (Username)</label>
+            <div class="relative">
+              <i data-lucide="user" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+              <input type="text" id="login-username" required placeholder="Ingiza username" class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-gold-500 font-semibold text-slate-800" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Neno la Siri (Password)</label>
+            <div class="relative">
+              <i data-lucide="lock" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+              <input type="password" id="login-password" required placeholder="Ingiza password" class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-gold-500 font-semibold text-slate-800" />
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-navy-900 to-navy-800 hover:from-navy-800 hover:to-navy-950 text-white font-extrabold text-sm shadow-xl transition transform active:scale-95 flex items-center justify-center gap-2">
+            <i data-lucide="log-in" class="w-4 h-4 text-gold-400"></i> Ingia Mfumoni
+          </button>
+        </form>
+
+        <div class="mt-6 pt-5 border-t border-slate-200">
+          <p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 text-center">Akaunti za Mfano (Quick Demo Login):</p>
+          <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+            <button onclick="quickLogin('admin', 'admin123')" class="p-2 rounded-xl bg-slate-100 hover:bg-gold-500 hover:text-slate-950 font-bold text-slate-700 transition border border-slate-200">
+              Admin
+            </button>
+            <button onclick="quickLogin('manager', 'manager123')" class="p-2 rounded-xl bg-slate-100 hover:bg-gold-500 hover:text-slate-950 font-bold text-slate-700 transition border border-slate-200">
+              Meneja
+            </button>
+            <button onclick="quickLogin('cashier', 'cashier123')" class="p-2 rounded-xl bg-slate-100 hover:bg-gold-500 hover:text-slate-950 font-bold text-slate-700 transition border border-slate-200">
+              Cashier
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN APPLICATION WORKSPACE -->
+    <div id="main-workspace" class="hidden flex-1 flex flex-col">
+      
+      <!-- TOP NAVIGATION BAR -->
+      <header class="sticky top-0 z-30 bg-navy-950 text-white shadow-xl border-b border-navy-800 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          
+          <div class="flex items-center gap-3">
+            <button onclick="toggleMobileMenu()" class="lg:hidden p-2 rounded-xl text-slate-300 hover:bg-navy-800 focus:outline-none">
+              <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+
+            <div class="flex items-center gap-3">
+              <div id="header-logo-container" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-gold-600 to-gold-400 flex items-center justify-center font-black text-slate-950 text-xl shadow-md overflow-hidden">
+                L
+              </div>
+              <div>
+                <h1 class="font-black text-lg tracking-wider text-white flex items-center gap-1.5 leading-none">
+                  LUWI <span class="text-gold-400 font-bold text-xs hidden sm:inline">STATIONERY</span>
+                </h1>
+                <p class="text-[10px] text-slate-400 mt-0.5 hidden sm:block">Management System + Firebase SDK</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 sm:gap-4">
+            <div class="hidden sm:flex items-center bg-navy-900 border border-navy-800 rounded-xl p-1 text-xs">
+              <button onclick="changeFontScale(-1)" title="Punguza Ukubwa wa Maandishi" class="px-2 py-1 hover:text-gold-400 font-extrabold text-slate-300">A-</button>
+              <button onclick="resetFontScale()" title="Ukubwa wa Kawaida" class="px-2 py-1 hover:text-gold-400 font-bold text-slate-400 border-x border-navy-800">A</button>
+              <button onclick="changeFontScale(1)" title="Ongeza Ukubwa wa Maandishi" class="px-2 py-1 hover:text-gold-400 font-extrabold text-slate-300">A+</button>
+            </div>
+
+            <button onclick="switchTab('mauzo')" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-gold-500 to-gold-400 hover:from-gold-400 hover:to-gold-300 text-slate-950 font-black text-xs shadow-md transition transform active:scale-95">
+              <i data-lucide="shopping-cart" class="w-4 h-4"></i> POS Mauzo
+            </button>
+
+            <div class="flex items-center gap-2 pl-2 border-l border-navy-800">
+              <div id="user-avatar" class="w-9 h-9 rounded-full bg-navy-800 border-2 border-gold-500/60 flex items-center justify-center font-black text-gold-400 text-xs shadow-inner">
+                U
+              </div>
+              <div class="hidden md:block text-left">
+                <p id="user-display-name" class="text-xs font-bold text-slate-100 leading-none">User</p>
+                <span id="user-display-role" class="text-[10px] text-gold-400 font-semibold">Role</span>
+              </div>
+              
+              <button onclick="handleLogout()" title="Ondoka (Logout)" class="p-2 rounded-xl text-slate-400 hover:text-red-400 hover:bg-navy-900 transition ml-1">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- BODY CONTENT WITH SIDEBAR & ACTIVE MODULE VIEW -->
+      <div class="flex-1 flex max-w-7xl w-full mx-auto px-2 sm:px-4 lg:px-6 py-4 gap-5">
+        
+        <!-- SIDEBAR NAVIGATION DRAWER -->
+        <aside id="sidebar-menu" class="fixed lg:static inset-y-0 left-0 z-40 w-64 bg-navy-950 lg:bg-transparent text-slate-300 flex flex-col justify-between p-3 rounded-2xl lg:shadow-none shadow-2xl transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 no-print">
+          <div class="space-y-1">
+            <div class="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              Menu Kuu
+            </div>
+
+            <nav id="nav-list" class="space-y-1 text-xs font-semibold">
+              <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition hover:bg-navy-900 hover:text-white">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Ukurasa Mkuu
+              </button>
+
+              <button onclick="switchTab('mauzo')" id="nav-mauzo" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition hover:bg-navy-900 hover:text-white">
+                <i data-lucide="shopping-cart" class="w-4 h-4"></i> Mauzo (POS)
+              </button>
+
+              <button onclick="switchTab('bidhaa')" id="nav-bidhaa" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition hover:bg-navy-900 hover:text-white">
+                <i data-lucide="package" class="w-4 h-4"></i> Usimamizi Bidhaa
+              </button>
+
+              <button onclick="switchTab('manunuzi')" id="nav-manunuzi" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition hover:bg-navy-900 hover:text-white">
+                <i data-lucide="truck" class="w-4 h-4"></i> Manunuzi (Purchases)
+              </button>
+
+              <button onclick="switchTab('stock')" id="nav-stock" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition hover:bg-navy-900 hover:text-white">
+                <i data-lucide="layers" class="w-4 h-4"></i> Stock & Adjustments
+              </button>
+
+              <button onclick="switchTab('faida')" id="nav-faida" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition hover:bg-navy-900 hover:text-white">
+                <i data-lucide="trending-up" class="w-4 h-4"></i> Faida na Hasara (FIFO)
+              </button>
+
+              <button onclick="switchTab('matumizi')" id="nav-matumizi" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition hover:bg-navy-900 hover:text-white">
+                <i data-lucide="dollar-sign" class="w-4 h-4"></i> Matumizi (Expenses)
+              </button>
+
+              <button onclick="switchTab('wateja')" id="nav-wateja" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition hover:bg-navy-900 hover:text-white">
+                <i data-lucide="users" class="w-4 h-4"></i> Wateja & Suppliers
+              </button>
+
+              <button onclick="switchTab('ripoti')" id="nav-ripoti" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition hover:bg-navy-900 hover:text-white">
+                <i data-lucide="file-text" class="w-4 h-4"></i> Ripoti Zote
+              </button>
+
+              <div class="pt-3 px-3 text-[10px] font-black tracking-widest text-slate-400 uppercase border-t border-navy-800/60 mt-3">
+                Usimamizi Mkuu
+              </div>
+
+              <button onclick="switchTab('watumiaji')" id="nav-watumiaji" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition hover:bg-navy-900 hover:text-white">
+                <i data-lucide="shield" class="w-4 h-4"></i> Watumiaji & Audit
+              </button>
+
+              <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition hover:bg-navy-900 hover:text-white">
+                <i data-lucide="settings" class="w-4 h-4"></i> Mipangilio & Backup
+              </button>
+            </nav>
+          </div>
+
+          <div class="p-3 bg-navy-900/90 rounded-xl border border-navy-800 text-[11px] space-y-1">
+            <div class="flex items-center gap-2 text-amber-400 font-bold">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> Firebase & IndexedDB Active
+            </div>
+            <p class="text-slate-400 text-[10px]">pastoraloyce-3530f</p>
+          </div>
+        </aside>
+
+        <!-- MAIN DYNAMIC CONTENT CONTAINER -->
+        <main class="flex-1 min-w-0 bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-6 shadow-sm overflow-hidden">
+          
+          <!-- MODULE 1: DASHBOARD -->
+          <section id="mod-dashboard" class="module-view space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h2 class="text-xl sm:text-2xl font-black text-navy-950">Ukurasa Mkuu (Dashboard)</h2>
+                <p class="text-xs text-slate-500">Muhtasari wa mauzo, faida na hali ya stock kwa mfumo wa LUWI STATIONERY</p>
+              </div>
+              <span id="dash-date" class="text-xs bg-slate-100 px-3 py-1.5 rounded-xl text-slate-600 font-bold border border-slate-200">
+                Leo: 2026
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div class="p-4 rounded-2xl bg-gradient-to-br from-navy-950 to-navy-900 text-white shadow-md">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-300">Jumla ya Bidhaa</span>
+                  <i data-lucide="package" class="w-5 h-5 text-gold-400"></i>
+                </div>
+                <h3 id="dash-skus" class="text-2xl font-black mt-2">0 SKUs</h3>
+                <p id="dash-stock-qty" class="text-xs text-slate-400 mt-0.5">0 vipande dukani</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-gold-400 transition">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-500">Stock kwa Kununulia (FIFO)</span>
+                  <i data-lucide="tag" class="w-5 h-5 text-blue-600"></i>
+                </div>
+                <h3 id="dash-stock-cost" class="text-xl font-bold text-slate-900 mt-2">Tsh 0</h3>
+                <p class="text-[11px] text-slate-500 mt-0.5">Thamani ya Kununua Mzigo</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-gold-400 transition">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-500">Stock kwa Kuuza (Retail)</span>
+                  <i data-lucide="dollar-sign" class="w-5 h-5 text-emerald-600"></i>
+                </div>
+                <h3 id="dash-stock-retail" class="text-xl font-bold text-slate-900 mt-2">Tsh 0</h3>
+                <p id="dash-expected-profit" class="text-[11px] text-emerald-600 font-bold mt-0.5">Tarajiwa: +Tsh 0</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-gold-500 text-navy-950 shadow-md">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-black uppercase tracking-wider">Mauzo ya Leo</span>
+                  <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                </div>
+                <h3 id="dash-sales-today" class="text-2xl font-black mt-2">Tsh 0</h3>
+                <p id="dash-sales-count" class="text-xs font-bold text-navy-900 mt-0.5">0 Miamala</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-500">Manunuzi ya Leo</span>
+                  <i data-lucide="truck" class="w-5 h-5 text-indigo-600"></i>
+                </div>
+                <h3 id="dash-purchases-today" class="text-xl font-bold text-slate-900 mt-2">Tsh 0</h3>
+                <p class="text-[11px] text-slate-500 mt-0.5">Gharama za Stock Mpya</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-500">Faida Ghafi ya Leo (Gross)</span>
+                  <i data-lucide="trending-up" class="w-5 h-5 text-emerald-600"></i>
+                </div>
+                <h3 id="dash-gross-today" class="text-xl font-bold text-emerald-700 mt-2">Tsh 0</h3>
+                <p class="text-[11px] text-slate-500 mt-0.5">FIFO COGS Subtracted</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-500">Faida ya Mwezi Huu</span>
+                  <i data-lucide="bar-chart-2" class="w-5 h-5 text-gold-600"></i>
+                </div>
+                <h3 id="dash-profit-month" class="text-xl font-bold text-slate-900 mt-2">Tsh 0</h3>
+                <p id="dash-expenses-month" class="text-[11px] text-slate-500 mt-0.5">Matumizi: Tsh 0</p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-red-50 border border-red-200 shadow-sm col-span-1 sm:col-span-2 lg:col-span-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-red-800">Alerts za Stock</span>
+                  <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
+                </div>
+                <div class="mt-2 flex items-center justify-between">
+                  <div>
+                    <p id="dash-out-count" class="text-sm font-bold text-red-800">0 Zimeisha</p>
+                    <p id="dash-low-count" class="text-xs text-gold-700 font-semibold">0 Zinakaribia</p>
+                  </div>
+                  <button onclick="switchTab('stock')" class="px-2.5 py-1 text-xs bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition">
+                    Angalia
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 class="text-base font-bold text-navy-950">Chati ya Mauzo na Faida (Sales & Profit)</h3>
+                  <p class="text-xs text-slate-500">Mwenendo wa mauzo na faida halisi kwa kila kipindi</p>
+                </div>
+
+                <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 self-start text-xs">
+                  <button onclick="updateDashboardChart('Daily')" id="btn-chart-daily" class="px-3 py-1 rounded-lg font-bold bg-gold-500 text-slate-950 shadow-sm">Siku</button>
+                  <button onclick="updateDashboardChart('Weekly')" id="btn-chart-weekly" class="px-3 py-1 rounded-lg font-bold text-slate-600 hover:text-slate-950">Wiki</button>
+                  <button onclick="updateDashboardChart('Monthly')" id="btn-chart-monthly" class="px-3 py-1 rounded-lg font-bold text-slate-600 hover:text-slate-950">Mwezi</button>
+                </div>
+              </div>
+
+              <div class="h-64 w-full">
+                <canvas id="salesProfitChart"></canvas>
+              </div>
+            </div>
+          </section>
+
+          <!-- MODULE 2: POS MAUZO -->
+          <section id="mod-mauzo" class="module-view hidden h-full flex flex-col lg:flex-row gap-5">
+            <div class="flex-1 flex flex-col min-w-0">
+              <div class="space-y-3 mb-4">
+                <div class="relative">
+                  <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+                  <input type="text" id="pos-search-input" oninput="renderPosGrid()" placeholder="Tafuta kwa Jina la Bidhaa au Scan Barcode..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-gold-500 text-xs font-semibold" />
+                </div>
+
+                <div id="pos-category-pills" class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs"></div>
+              </div>
+
+              <div id="pos-product-grid" class="flex-1 overflow-y-auto max-h-[calc(100vh-280px)] pr-1 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+            </div>
+
+            <div class="w-full lg:w-96 bg-navy-950 text-white rounded-2xl p-4 flex flex-col justify-between shadow-2xl">
+              <div>
+                <div class="flex items-center justify-between pb-3 border-b border-navy-800">
+                  <h3 class="font-extrabold text-sm text-white flex items-center gap-2">
+                    <i data-lucide="shopping-cart" class="w-4 h-4 text-gold-400"></i> Kikapu cha Mauzo
+                  </h3>
+                  <button onclick="clearCart()" class="text-xs text-red-400 hover:underline font-semibold">Futa Vyote</button>
+                </div>
+
+                <div id="pos-cart-list" class="my-3 space-y-2 max-h-56 overflow-y-auto pr-1"></div>
+              </div>
+
+              <div class="space-y-3 pt-3 border-t border-navy-800 text-xs">
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Mteja (Hiari):</label>
+                    <select id="pos-customer-select" class="w-full bg-navy-900 border border-navy-800 text-white rounded-xl px-2.5 py-1.5 focus:outline-none text-xs font-semibold">
+                      <option value="">-- Walk-in Customer --</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Njia ya Malipo:</label>
+                    <select id="pos-payment-method" class="w-full bg-navy-900 border border-navy-800 text-white rounded-xl px-2.5 py-1.5 focus:outline-none text-xs font-semibold">
+                      <option value="Cash">Cash (Taslimu)</option>
+                      <option value="Mobile Money">Mobile Money</option>
+                      <option value="Bank">Bank Transfer</option>
+                      <option value="Mkopo">Mkopo wa Mteja</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Punguzo (Discount Tsh):</label>
+                    <input type="number" id="pos-discount" oninput="calculateCartTotals()" placeholder="0" class="w-full bg-navy-900 border border-navy-800 text-white rounded-xl px-2.5 py-1.5 focus:outline-none text-xs font-semibold" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Kiasi Kilicholipwa (Tsh):</label>
+                    <input type="number" id="pos-amount-paid" oninput="calculateCartTotals()" placeholder="0" class="w-full bg-navy-900 border border-navy-800 text-gold-400 font-extrabold rounded-xl px-2.5 py-1.5 focus:outline-none text-xs" />
+                  </div>
+                </div>
+
+                <div class="bg-navy-900 p-3 rounded-xl space-y-1.5 text-xs border border-navy-800">
+                  <div class="flex justify-between text-slate-400">
+                    <span>Jumla Ndogo:</span>
+                    <span id="pos-subtotal-text">Tsh 0</span>
+                  </div>
+                  <div class="flex justify-between text-gold-400">
+                    <span>Punguzo:</span>
+                    <span id="pos-discount-text">-Tsh 0</span>
+                  </div>
+                  <div class="flex justify-between text-base font-black text-white pt-1 border-t border-navy-800">
+                    <span>Jumla Kuu:</span>
+                    <span id="pos-grand-text" class="text-gold-400">Tsh 0</span>
+                  </div>
+                  <div class="flex justify-between text-emerald-400 font-bold">
+                    <span>Chenji kwa Mteja:</span>
+                    <span id="pos-change-text">Tsh 0</span>
+                  </div>
+                </div>
+
+                <button onclick="executeCompleteSale()" id="btn-complete-sale" class="w-full py-3 rounded-xl bg-gradient-to-r from-gold-500 to-gold-400 hover:from-gold-400 hover:to-gold-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg transition transform active:scale-95">
+                  Kamilisha Mauzo & Risiti
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- MODULE 3: BIDHAA -->
+          <section id="mod-bidhaa" class="module-view hidden space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h2 class="text-xl font-black text-navy-950">Usimamizi wa Bidhaa (Products)</h2>
+                <p class="text-xs text-slate-500">Sajili na udhibiti bei, vipimo, na stock ya bidhaa</p>
+              </div>
+              <button onclick="openProductModal()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 text-slate-950 font-bold text-xs shadow transition self-start">
+                <i data-lucide="plus" class="w-4 h-4"></i> Sajili Bidhaa Mpya
+              </button>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-navy-950 text-white font-bold">
+                    <th class="p-3">Barcode</th>
+                    <th class="p-3">Jina la Bidhaa</th>
+                    <th class="p-3">Kategoria</th>
+                    <th class="p-3">Kipimo</th>
+                    <th class="p-3 text-right">Bei Kununua</th>
+                    <th class="p-3 text-right">Bei Kuuza</th>
+                    <th class="p-3 text-right">Faida / Unit</th>
+                    <th class="p-3 text-right">% Faida</th>
+                    <th class="p-3 text-center">Stock</th>
+                    <th class="p-3 text-center">Kitendo</th>
+                  </tr>
+                </thead>
+                <tbody id="product-table-body" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- MODULE 4: MANUNUZI -->
+          <section id="mod-manunuzi" class="module-view hidden space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h2 class="text-xl font-black text-navy-950">Manunuzi (Purchases & FIFO Batches)</h2>
+                <p class="text-xs text-slate-500">Rekodi ununuzi mpya wa bidhaa ili kuongeza stock na kuweka historia ya bei</p>
+              </div>
+              <button onclick="openPurchaseModal()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 text-slate-950 font-bold text-xs shadow transition self-start">
+                <i data-lucide="plus" class="w-4 h-4"></i> Rekodi Ununuzi Mpya
+              </button>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-navy-950 text-white font-bold">
+                    <th class="p-3">Risiti #</th>
+                    <th class="p-3">Tarehe</th>
+                    <th class="p-3">Supplier</th>
+                    <th class="p-3">Bidhaa</th>
+                    <th class="p-3 text-center">Idadi</th>
+                    <th class="p-3 text-right">Bei ya Unit</th>
+                    <th class="p-3 text-right">Gharama Nyingine</th>
+                    <th class="p-3 text-right">Jumla Malipo</th>
+                  </tr>
+                </thead>
+                <tbody id="purchases-table-body" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- MODULE 5: STOCK & ADJUSTMENTS -->
+          <section id="mod-stock" class="module-view hidden space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h2 class="text-xl font-black text-navy-950">Usimamizi wa Stock & Movements</h2>
+                <p class="text-xs text-slate-500">Historia ya mabadiliko yote ya stock na utoaji wa zilizoharibika</p>
+              </div>
+              <button onclick="openStockAdjustModal()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow transition self-start">
+                <i data-lucide="alert-triangle" class="w-4 h-4"></i> Ripoti Uharibifu / Marekebisho
+              </button>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-navy-950 text-white font-bold">
+                    <th class="p-3">Tarehe/Muda</th>
+                    <th class="p-3">Bidhaa</th>
+                    <th class="p-3">Aina ya Mabadiliko</th>
+                    <th class="p-3 text-center">Mabadiliko Qty</th>
+                    <th class="p-3">Maelezo</th>
+                  </tr>
+                </thead>
+                <tbody id="stock-movements-body" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- MODULE 6: FAIDA NA HASARA -->
+          <section id="mod-faida" class="module-view hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h2 class="text-xl font-black text-navy-950">Faida na Hasara (Profit & Loss - Strict FIFO)</h2>
+                <p class="text-xs text-slate-500">Hesabu sahihi kulingana na gharama halisi ya mzigo (First-In First-Out)</p>
+              </div>
+
+              <div class="flex items-center gap-2 text-xs">
+                <label class="font-bold text-slate-700">Kipindi:</label>
+                <select id="pnl-filter" onchange="renderProfitAndLoss()" class="border rounded-xl px-3 py-1.5 font-bold focus:outline-none">
+                  <option value="All">Muda Wote</option>
+                  <option value="Today">Leo</option>
+                  <option value="Month">Mwezi Huu</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <div class="p-4 rounded-2xl bg-navy-950 text-white">
+                <span class="text-xs text-slate-400 font-semibold">Jumla Mauzo</span>
+                <h3 id="pnl-revenue" class="text-2xl font-black mt-2 text-gold-400">Tsh 0</h3>
+              </div>
+              <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <span class="text-xs text-slate-500 font-semibold">FIFO COGS (Gharama)</span>
+                <h3 id="pnl-cogs" class="text-2xl font-black mt-2 text-slate-800">Tsh 0</h3>
+              </div>
+              <div class="p-4 rounded-2xl bg-emerald-700 text-white">
+                <span class="text-xs text-emerald-100 font-semibold">Faida Ghafi (Gross Profit)</span>
+                <h3 id="pnl-gross" class="text-2xl font-black mt-2">Tsh 0</h3>
+              </div>
+              <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <span class="text-xs text-slate-500 font-semibold">Faida Halisi (Baada ya Expenses)</span>
+                <h3 id="pnl-net" class="text-2xl font-black mt-2 text-blue-700">Tsh 0</h3>
+              </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3">
+              <h3 class="font-bold text-sm text-navy-950">Uchanganuzi wa Faida Kwa Kila Mauzo</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr class="bg-slate-100 text-slate-700 font-bold border-b">
+                      <th class="p-2.5">Risiti #</th>
+                      <th class="p-2.5">Tarehe</th>
+                      <th class="p-2.5">Mteja</th>
+                      <th class="p-2.5 text-right">Mauzo Total</th>
+                      <th class="p-2.5 text-right">FIFO COGS</th>
+                      <th class="p-2.5 text-right">Faida Ghafi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pnl-sales-body" class="divide-y divide-slate-100"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- MODULE 7: MATUMIZI YA BIASHARA -->
+          <section id="mod-matumizi" class="module-view hidden space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h2 class="text-xl font-black text-navy-950">Matumizi ya Biashara (Expenses)</h2>
+                <p class="text-xs text-slate-500">Rekodi kodi, umeme, usafiri, mishahara na matumizi mengine</p>
+              </div>
+              <button onclick="openExpenseModal()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 text-slate-950 font-bold text-xs shadow transition self-start">
+                <i data-lucide="plus" class="w-4 h-4"></i> Rekodi Matumizi
+              </button>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-navy-950 text-white font-bold">
+                    <th class="p-3">Tarehe</th>
+                    <th class="p-3">Kategoria</th>
+                    <th class="p-3">Maelezo</th>
+                    <th class="p-3 text-right">Kiasi (Tsh)</th>
+                  </tr>
+                </thead>
+                <tbody id="expenses-table-body" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- MODULE 8: WATEJA NA SUPPLIERS -->
+          <section id="mod-wateja" class="module-view hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h2 class="text-xl font-black text-navy-950">Wateja & Wasambazaji (Customers & Suppliers)</h2>
+                <p class="text-xs text-slate-500">Usimamizi wa madeni ya wateja, mawasiliano (Call & SMS) na WASAMBAZAJI</p>
+              </div>
+              <button onclick="openCustomerModal()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 text-slate-950 font-bold text-xs shadow transition self-start">
+                <i data-lucide="user-plus" class="w-4 h-4"></i> Sajili Mteja Mpya
+              </button>
+            </div>
+
+            <!-- Customers Table with Call, SMS, Edit, Delete & Pay buttons -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3">
+              <h3 class="font-bold text-sm text-navy-950 flex items-center gap-2">
+                <i data-lucide="users" class="w-4 h-4 text-gold-600"></i> Orodha ya Wateja & Mawasiliano
+              </h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr class="bg-slate-100 font-bold border-b">
+                      <th class="p-2.5">Jina la Mteja</th>
+                      <th class="p-2.5">Simu</th>
+                      <th class="p-2.5">Eneo</th>
+                      <th class="p-2.5 text-right">Deni Lililopo</th>
+                      <th class="p-2.5 text-center">Mawasiliano & Vitendo</th>
+                    </tr>
+                  </thead>
+                  <tbody id="customers-table-body" class="divide-y divide-slate-100"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Suppliers List -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3">
+              <h3 class="font-bold text-sm text-navy-950">Wasambazaji (Suppliers)</h3>
+              <div id="suppliers-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            </div>
+          </section>
+
+          <!-- MODULE 9: RIPOTI ZOTE -->
+          <section id="mod-ripoti" class="module-view hidden space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h2 class="text-xl font-black text-navy-950">Ripoti Zote za Biashara</h2>
+                <p class="text-xs text-slate-500">Pakua na uchapishe ripoti kamili kwa Excel au PDF</p>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button onclick="exportCurrentReportToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i> Export Excel
+                </button>
+                <button onclick="window.print()" class="flex items-center gap-1.5 px-3 py-1.5 bg-gold-500 hover:bg-gold-400 text-slate-950 rounded-xl text-xs font-bold transition">
+                  <i data-lucide="printer" class="w-3.5 h-3.5"></i> Chapisha Ripoti
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto text-xs">
+              <button onclick="selectReportType('mauzo')" id="rep-btn-mauzo" class="rep-tab-btn px-3.5 py-1.5 rounded-lg font-bold bg-gold-500 text-slate-950 shadow-sm">Mauzo</button>
+              <button onclick="selectReportType('manunuzi')" id="rep-btn-manunuzi" class="rep-tab-btn px-3.5 py-1.5 rounded-lg font-bold text-slate-600 hover:bg-slate-100">Manunuzi</button>
+              <button onclick="selectReportType('stock')" id="rep-btn-stock" class="rep-tab-btn px-3.5 py-1.5 rounded-lg font-bold text-slate-600 hover:bg-slate-100">Stock Status</button>
+              <button onclick="selectReportType('matumizi')" id="rep-btn-matumizi" class="rep-tab-btn px-3.5 py-1.5 rounded-lg font-bold text-slate-600 hover:bg-slate-100">Matumizi</button>
+            </div>
+
+            <div id="report-output-container" class="p-4 border border-slate-200 rounded-2xl bg-white shadow-sm space-y-3"></div>
+          </section>
+
+          <!-- MODULE 10: WATUMIAJI & AUDIT TRAIL -->
+          <section id="mod-watumiaji" class="module-view hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h2 class="text-xl font-black text-navy-950">Watumiaji & Audit Trail</h2>
+                <p class="text-xs text-slate-500">Usimamizi wa akaunti za watumiaji na kumbukumbu za matukio</p>
+              </div>
+              <button onclick="openUserModal()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 text-slate-950 font-bold text-xs shadow transition self-start">
+                <i data-lucide="plus" class="w-4 h-4"></i> Ongeza Mtumiaji
+              </button>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3">
+              <h3 class="font-bold text-sm text-navy-950">Akaunti za Mfumo</h3>
+              <div id="users-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3">
+              <h3 class="font-bold text-sm text-navy-950">Audit Trail (Kumbukumbu za Mfumo)</h3>
+              <div class="overflow-x-auto max-h-80">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr class="bg-navy-950 text-white font-bold">
+                      <th class="p-2.5">Muda</th>
+                      <th class="p-2.5">Mtumiaji</th>
+                      <th class="p-2.5">Cheo</th>
+                      <th class="p-2.5">Kitendo</th>
+                      <th class="p-2.5">Maelezo</th>
+                    </tr>
+                  </thead>
+                  <tbody id="audit-logs-body" class="divide-y divide-slate-100"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- MODULE 11: MIPANGILIO & BACKUP -->
+          <section id="mod-settings" class="module-view hidden space-y-6">
+            <div class="border-b border-slate-100 pb-4">
+              <h2 class="text-xl font-black text-navy-950">Mipangilio ya Mfumo & Backup</h2>
+              <p class="text-xs text-slate-500">Badilisha Logo na uweke au urejeshe nakala ya akiba (JSON Backup)</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div class="p-4 border border-slate-200 rounded-2xl bg-white shadow-sm space-y-3">
+                <h3 class="font-bold text-sm text-navy-950">Logo ya LUWI STATIONERY</h3>
+                <p class="text-xs text-slate-500">Pakia picha ya Logo mpya itakayotumika kwenye Risiti na Header</p>
+                
+                <div class="flex items-center gap-4 pt-2">
+                  <div id="settings-logo-preview" class="w-16 h-16 rounded-xl bg-slate-100 border flex items-center justify-center text-slate-400 text-xs font-bold overflow-hidden">
+                    Logo
+                  </div>
+                  <div>
+                    <input type="file" id="logo-file-input" accept="image/*" onchange="handleLogoUpload(event)" class="hidden" />
+                    <label for="logo-file-input" class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-navy-950 text-white text-xs font-bold hover:bg-navy-900 transition">
+                      <i data-lucide="upload" class="w-3.5 h-3.5"></i> Chagua Picha ya Logo
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-4 border border-slate-200 rounded-2xl bg-white shadow-sm space-y-3">
+                <h3 class="font-bold text-sm text-navy-950">Backup & Restore Data</h3>
+                <p class="text-xs text-slate-500">Pakua faili la JSON la data zote au urejeshe data kutoka kwenye akiba</p>
+
+                <div class="space-y-2 pt-1">
+                  <button onclick="downloadJsonBackup()" class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gold-500 hover:bg-gold-400 text-slate-950 font-bold text-xs transition shadow-sm">
+                    <i data-lucide="download" class="w-4 h-4"></i> Pakua Backup JSON File
+                  </button>
+
+                  <div class="relative">
+                    <input type="file" id="restore-file-input" accept=".json" onchange="restoreJsonBackup(event)" class="hidden" />
+                    <label for="restore-file-input" class="w-full cursor-pointer flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition border border-slate-300">
+                      <i data-lucide="upload" class="w-4 h-4"></i> Rejesha Data kutoka JSON File
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </main>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- MODALS CONTAINER -->
+
+  <!-- 1. PRINTABLE THERMAL/A4 RECEIPT MODAL -->
+  <div id="receipt-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 overflow-y-auto max-h-[90vh] text-slate-800">
+      
+      <div id="printable-area" class="p-4 border border-slate-200 rounded-xl bg-white font-mono text-xs">
+        <div class="text-center mb-3">
+          <div id="receipt-logo-slot" class="w-12 h-12 mx-auto mb-1 flex items-center justify-center"></div>
+          <h2 class="text-base font-black text-slate-900">LUWI STATIONERY</h2>
+          <p class="text-[10px] text-slate-600">Vifaa vya Shule, Ofisi & Printing</p>
+          <p class="text-[10px] text-slate-500">Simu: +255 700 000 000 | Dar es Salaam</p>
+          <div class="border-b border-dashed border-slate-300 my-2"></div>
+          <p id="rcpt-no" class="font-bold text-slate-900">RISITI #</p>
+          <p id="rcpt-date" class="text-[10px] text-slate-600">Tarehe: </p>
+          <p id="rcpt-cashier" class="text-[10px] text-slate-600">Cashier: </p>
+          <p id="rcpt-customer" class="text-[10px] text-slate-600">Mteja: </p>
+        </div>
+
+        <div class="border-b border-slate-300 my-2"></div>
+
+        <table class="w-full text-left my-2 text-[11px]">
+          <thead>
+            <tr class="border-b border-slate-300 text-slate-700">
+              <th class="pb-1">Bidhaa</th>
+              <th class="pb-1 text-center">Qty</th>
+              <th class="pb-1 text-right">Bei</th>
+              <th class="pb-1 text-right">Jumla</th>
+            </tr>
+          </thead>
+          <tbody id="rcpt-items-body" class="divide-y divide-slate-100"></tbody>
+        </table>
+
+        <div class="border-b border-dashed border-slate-300 my-2"></div>
+
+        <div class="space-y-1 text-slate-700 text-[11px]">
+          <div class="flex justify-between">
+            <span>Jumla Ndogo:</span>
+            <span id="rcpt-subtotal">Tsh 0</span>
+          </div>
+          <div class="flex justify-between text-amber-700 font-semibold">
+            <span>Punguzo:</span>
+            <span id="rcpt-discount">-Tsh 0</span>
+          </div>
+          <div class="flex justify-between font-black text-slate-900 text-xs pt-1 border-t border-slate-200">
+            <span>Jumla Kuu:</span>
+            <span id="rcpt-grand">Tsh 0</span>
+          </div>
+          <div class="flex justify-between pt-1">
+            <span>Njia ya Malipo:</span>
+            <span id="rcpt-method" class="font-bold">Cash</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Kiasi Kilicholipwa:</span>
+            <span id="rcpt-paid">Tsh 0</span>
+          </div>
+          <div class="flex justify-between text-emerald-700 font-bold">
+            <span>Chenji:</span>
+            <span id="rcpt-change">Tsh 0</span>
+          </div>
+        </div>
+
+        <div class="border-b border-dashed border-slate-300 my-3"></div>
+        <div class="text-center font-bold text-slate-900 text-[10px] uppercase tracking-wider">
+          *** ASANTE KWA KUNUNUA LUWI STATIONERY ***
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 mt-5">
+        <button onclick="closeReceiptModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-bold text-xs">Funga</button>
+        <button onclick="window.print()" class="flex items-center gap-2 px-5 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 text-slate-950 font-black text-xs shadow-md">
+          <i data-lucide="printer" class="w-4 h-4"></i> Chapisha Risiti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. PRODUCT EDIT / REGISTER MODAL -->
+  <div id="product-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 id="product-modal-title" class="font-black text-navy-950 text-base">Sajili Bidhaa Mpya</h3>
+        <button onclick="closeProductModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="product-form" onsubmit="handleSaveProduct(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="prod-form-id" />
+        
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Barcode / ID:</label>
+          <input type="text" id="prod-barcode" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-mono" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Jina la Bidhaa:</label>
+          <input type="text" id="prod-name" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Kategoria:</label>
+            <select id="prod-category" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold">
+              <option value="Madaftari">Madaftari</option>
+              <option value="Kalamu & Penseli">Kalamu & Penseli</option>
+              <option value="Karatasi & Rim">Karatasi & Rim</option>
+              <option value="Mafaili">Mafaili</option>
+              <option value="Vifaa vya Ofisini">Vifaa vya Ofisini</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Kipimo (Unit):</label>
+            <select id="prod-unit" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold">
+              <option value="Kipande">Kipande</option>
+              <option value="Dozen">Dozen</option>
+              <option value="Box">Box</option>
+              <option value="Packet">Packet</option>
+              <option value="Ream">Ream</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Bei Kununulia (Tsh):</label>
+            <input type="number" id="prod-cost" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Bei Kuuza (Tsh):</label>
+            <input type="number" id="prod-price" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-extrabold text-gold-700" />
+          </div>
+        </div>
+
+        <div id="prod-stock-field-container">
+          <label class="block font-bold text-slate-700 mb-1">Stock ya Mwanzo (Idadi):</label>
+          <input type="number" id="prod-stock" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-bold" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Kiwango cha Chini cha Stock Alert (Min):</label>
+          <input type="number" id="prod-min-stock" value="5" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold" />
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeProductModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-bold">Ghairi</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 text-slate-950 font-black">Hifadhi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. PURCHASE RECORD MODAL -->
+  <div id="purchase-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-black text-navy-950 text-base">Rekodi Ununuzi Mpya (FIFO Batch)</h3>
+        <button onclick="closePurchaseModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="purchase-form" onsubmit="handleSavePurchase(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Chagua Bidhaa:</label>
+          <select id="pur-product-id" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold"></select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Jina la Supplier:</label>
+          <input type="text" id="pur-supplier" placeholder="Muhibu Stationers Ltd" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Idadi Iliyonunuliwa:</label>
+            <input type="number" id="pur-qty" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-bold" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Bei ya Kununulia / Unit (Tsh):</label>
+            <input type="number" id="pur-unit-cost" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-bold" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Gharama Nyingine (Transport Tsh):</label>
+          <input type="number" id="pur-extra-cost" placeholder="0" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold" />
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closePurchaseModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-bold">Ghairi</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 text-slate-950 font-black">Sajili Ununuzi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. EXPENSE MODAL -->
+  <div id="expense-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-black text-navy-950 text-base">Rekodi Matumizi</h3>
+        <button onclick="closeExpenseModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="expense-form" onsubmit="handleSaveExpense(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Aina ya Matumizi:</label>
+          <select id="exp-category" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold">
+            <option value="Kodi ya Fremu">Kodi ya Fremu</option>
+            <option value="Umeme">Umeme (LUKU)</option>
+            <option value="Usafiri">Usafiri wa Mzigo</option>
+            <option value="Mishahara">Mishahara</option>
+            <option value="Vifungashio">Vifungashio</option>
+            <option value="Matengenezo">Matengenezo</option>
+            <option value="Matumizi Mengine">Matumizi Mengine</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Kiasi (Tsh):</label>
+          <input type="number" id="exp-amount" required placeholder="15000" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-extrabold text-red-600" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Maelezo Mengine:</label>
+          <input type="text" id="exp-notes" placeholder="LUKU ya mwezi huu" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold" />
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeExpenseModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-bold">Ghairi</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 text-slate-950 font-black">Hifadhi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. STOCK ADJUSTMENT / DAMAGED MODAL -->
+  <div id="stock-adjust-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-black text-red-700 text-base">Ripoti Uharibifu / Upungufu</h3>
+        <button onclick="closeStockAdjustModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="stock-adjust-form" onsubmit="handleSaveStockAdjust(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Chagua Bidhaa:</label>
+          <select id="adj-product-id" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-red-500 outline-none font-semibold"></select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Idadi Iliyoharibika/Kupotea:</label>
+          <input type="number" id="adj-qty" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-red-500 outline-none font-extrabold text-red-600" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Sababu:</label>
+          <textarea id="adj-reason" required placeholder="Iliharibika kwa maji" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-red-500 outline-none font-semibold"></textarea>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeStockAdjustModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-bold">Ghairi</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black">Ondoa Stock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. DEBT PAYMENT MODAL -->
+  <div id="debt-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-black text-navy-950 text-base">Pokea Malipo ya Deni</h3>
+        <button onclick="closeDebtModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="debt-form" onsubmit="handleSaveDebtPayment(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="debt-customer-id" />
+        
+        <div class="p-3 bg-slate-50 border rounded-xl">
+          <p id="debt-cust-name" class="font-bold text-slate-900"></p>
+          <p class="text-slate-600">Deni la Sasa: <span id="debt-cust-amount" class="text-red-600 font-black">Tsh 0</span></p>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Kiasi Anacholipa Sasa (Tsh):</label>
+          <input type="number" id="debt-pay-amount" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-extrabold text-emerald-700" />
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeDebtModal()" class="px-4 py-2 rounded-xl text-slate-600 font-bold">Ghairi</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black">Thibitisha Malipo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. ADD / EDIT CUSTOMER MODAL -->
+  <div id="customer-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 id="customer-modal-title" class="font-black text-navy-950 text-base">Sajili Mteja Mpya</h3>
+        <button onclick="closeCustomerModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="customer-form" onsubmit="handleSaveCustomer(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="cust-form-id" />
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Jina la Mteja:</label>
+          <input type="text" id="cust-name" required placeholder="Mf. Kassim Said" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Namba ya Simu:</label>
+          <input type="text" id="cust-phone" required placeholder="+255 7..." class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Eneo / Anwani:</label>
+          <input type="text" id="cust-location" placeholder="Mwenge, Dar es Salaam" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Deni la Mwanzo (Tsh):</label>
+          <input type="number" id="cust-debt" value="0" placeholder="0" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-extrabold text-red-600" />
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeCustomerModal()" class="px-4 py-2 rounded-xl text-slate-600 font-bold">Ghairi</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 text-slate-950 font-black">Hifadhi Mteja</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. ADD USER MODAL -->
+  <div id="user-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-black text-navy-950 text-base">Sajili Mtumiaji Mpya</h3>
+        <button onclick="closeUserModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="user-form" onsubmit="handleSaveUser(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Jina Buono:</label>
+          <input type="text" id="usr-name" required placeholder="Kassim Said" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Username:</label>
+          <input type="text" id="usr-username" required placeholder="kassim" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Cheo (Role):</label>
+          <select id="usr-role" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold">
+            <option value="Cashier">Cashier</option>
+            <option value="Manager">Manager</option>
+            <option value="Administrator">Administrator</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Password:</label>
+          <input type="password" id="usr-password" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-gold-500 outline-none font-semibold" />
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeUserModal()" class="px-4 py-2 rounded-xl text-slate-600 font-bold">Ghairi</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 text-slate-950 font-black">Sajili</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- FIREBASE SDK V10 MODULE INITIALIZATION -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+
+    // User's exact Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCv01cdwWFqeDcvMAkILY3K4G8yKJWwL6k",
+      authDomain: "pastoraloyce-3530f.firebaseapp.com",
+      projectId: "pastoraloyce-3530f",
+      storageBucket: "pastoraloyce-3530f.firebasestorage.app",
+      messagingSenderId: "978341477941",
+      appId: "1:978341477941:web:289e3b0671f00e52907b7c",
+      measurementId: "G-XYK8ZL0JSJ"
+    };
+
+    // Initialize Firebase
+    try {
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      window.firebaseApp = app;
+      console.log("Firebase initialized successfully for pastoraloyce-3530f");
+    } catch (err) {
+      console.warn("Firebase Analytics / App initialization warning:", err);
+    }
+  </script>
+
+  <!-- JAVASCRIPT APPLICATION CORE ENGINE & FIFO DATABASE -->
+  <script>
+    // INITIAL DEMO DATASET
+    const INITIAL_USERS = [
+      { id: 'usr-1', username: 'admin', name: 'Mkurugenzi Luwi', role: 'Administrator', password: 'admin123' },
+      { id: 'usr-2', username: 'manager', name: 'Meneja Neema', role: 'Manager', password: 'manager123' },
+      { id: 'usr-3', username: 'cashier', name: 'Mweka Hazina Juma', role: 'Cashier', password: 'cashier123' }
+    ];
+
+    const INITIAL_PRODUCTS = [
+      { id: 'p-1', barcode: '6001001', name: 'Daftari Counter Book 3 Quire', category: 'Madaftari', unit: 'Kipande', costPrice: 2500, sellingPrice: 3500, stock: 45, minStock: 10 },
+      { id: 'p-2', barcode: '6001002', name: 'Kalamu Ya Wino Bic (Bluu)', category: 'Kalamu & Penseli', unit: 'Kipande', costPrice: 350, sellingPrice: 500, stock: 120, minStock: 30 },
+      { id: 'p-3', barcode: '6001003', name: 'Rim Paper A4 Double A (80gsm)', category: 'Karatasi & Rim', unit: 'Ream', costPrice: 14000, sellingPrice: 18000, stock: 25, minStock: 5 },
+      { id: 'p-4', barcode: '6001004', name: 'Faili la Box Heavy Duty', category: 'Mafaili', unit: 'Kipande', costPrice: 4800, sellingPrice: 6500, stock: 18, minStock: 5 },
+      { id: 'p-5', barcode: '6001005', name: 'Rula ya Plastiki 30cm', category: 'Kalamu & Penseli', unit: 'Kipande', costPrice: 600, sellingPrice: 1000, stock: 50, minStock: 15 },
+      { id: 'p-6', barcode: '6001006', name: 'Penseli Steadtler HB', category: 'Kalamu & Penseli', unit: 'Kipande', costPrice: 180, sellingPrice: 300, stock: 8, minStock: 20 },
+      { id: 'p-7', barcode: '6001007', name: 'Marker Pen Permanent (Nyeusi)', category: 'Kalamu & Penseli', unit: 'Kipande', costPrice: 1000, sellingPrice: 1500, stock: 0, minStock: 10 },
+      { id: 'p-8', barcode: '6001008', name: 'Bahasha Kubwa A4 (Packet 50)', category: 'Karatasi & Rim', unit: 'Packet', costPrice: 9000, sellingPrice: 12000, stock: 15, minStock: 5 },
+      { id: 'p-9', barcode: '6001009', name: 'Stapler Heavy Duty 24/6', category: 'Vifaa vya Ofisini', unit: 'Kipande', costPrice: 6000, sellingPrice: 8500, stock: 12, minStock: 3 },
+      { id: 'p-10', barcode: '6001010', name: 'Gundi Ya Maji Glue Stick 36g', category: 'Vifaa vya Ofisini', unit: 'Kipande', costPrice: 1200, sellingPrice: 2000, stock: 30, minStock: 8 }
+    ];
+
+    const INITIAL_BATCHES = INITIAL_PRODUCTS.map(p => ({
+      id: `batch-init-${p.id}`,
+      productId: p.id,
+      qtyRemaining: p.stock,
+      unitCost: p.costPrice,
+      date: new Date().toISOString()
+    }));
+
+    const INITIAL_SUPPLIERS = [
+      { id: 'sup-1', name: 'Muhibu Stationers Ltd', phone: '+255712345678', location: 'Kariakoo, Dar es Salaam' },
+      { id: 'sup-2', name: 'Tanzania Paper & School Supplies', phone: '+255784990112', location: 'Arusha Central' }
+    ];
+
+    const INITIAL_CUSTOMERS = [
+      { id: 'cust-1', name: 'Shule ya Msingi Uhuru', phone: '+255655112233', debt: 25000, location: 'Mwenge, Dar es Salaam' },
+      { id: 'cust-2', name: 'Ofisi ya Halmashauri', phone: '+255713998877', debt: 0, location: 'City Center' }
+    ];
+
+    const INITIAL_EXPENSES = [
+      { id: 'exp-1', date: new Date().toISOString().split('T')[0], category: 'Kodi ya Fremu', amount: 150000, notes: 'Kodi ya mwezi huu' },
+      { id: 'exp-2', date: new Date().toISOString().split('T')[0], category: 'Umeme', amount: 25000, notes: 'LUKU Ofisini' }
+    ];
+
+    // APPLICATION STATE CONTAINER
+    let db = {
+      users: [...INITIAL_USERS],
+      currentUser: null,
+      products: [...INITIAL_PRODUCTS],
+      batches: [...INITIAL_BATCHES],
+      purchases: [],
+      sales: [],
+      stockMovements: [],
+      suppliers: [...INITIAL_SUPPLIERS],
+      customers: [...INITIAL_CUSTOMERS],
+      expenses: [...INITIAL_EXPENSES],
+      auditLogs: [],
+      logoUrl: ''
+    };
+
+    let cart = [];
+    let currentReportTab = 'mauzo';
+    let dashboardChartInstance = null;
+    let fontScaleLevel = 1;
+
+    // INDEXEDDB PERSISTENCE ENGINE
+    const DB_NAME = 'LuwiStationeryDB';
+    const DB_VERSION = 1;
+
+    function initIndexedDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = (e) => {
+          const idb = e.target.result;
+          if (!idb.objectStoreNames.contains('appState')) {
+            idb.createObjectStore('appState');
+          }
+        };
+        request.onsuccess = (e) => resolve(e.target.result);
+        request.onerror = (e) => reject(e);
+      });
+    }
+
+    async function saveStateToStorage() {
+      try {
+        localStorage.setItem('luwi_db_state', JSON.stringify(db));
+      } catch (e) {
+        console.warn('LocalStorage quota exceeded');
+      }
+
+      try {
+        const idb = await initIndexedDB();
+        const tx = idb.transaction('appState', 'readwrite');
+        tx.objectStore('appState').put(db, 'state');
+      } catch (e) {
+        console.error('IndexedDB Save Error:', e);
+      }
+    }
+
+    async function loadStateFromStorage() {
+      try {
+        const idb = await initIndexedDB();
+        const tx = idb.transaction('appState', 'readonly');
+        const req = tx.objectStore('appState').get('state');
+        
+        req.onsuccess = () => {
+          if (req.result) {
+            db = { ...db, ...req.result };
+            onStateLoaded();
+          } else {
+            const local = localStorage.getItem('luwi_db_state');
+            if (local) {
+              db = { ...db, ...JSON.parse(local) };
+            }
+            onStateLoaded();
+          }
+        };
+      } catch (e) {
+        const local = localStorage.getItem('luwi_db_state');
+        if (local) {
+          db = { ...db, ...JSON.parse(local) };
+        }
+        onStateLoaded();
+      }
+    }
+
+    function onStateLoaded() {
+      renderLogoDisplays();
+      if (db.currentUser) {
+        document.getElementById('login-view').classList.add('hidden');
+        document.getElementById('main-workspace').classList.remove('hidden');
+        setupUserWorkspace();
+      } else {
+        document.getElementById('login-view').classList.remove('hidden');
+        document.getElementById('main-workspace').classList.add('hidden');
+      }
+    }
+
+    // HELPER FORMATTERS & UTILITIES
+    function formatTsh(val) {
+      return 'Tsh ' + (Number(val) || 0).toLocaleString('sw-TZ', { maximumFractionDigits: 0 });
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('sw-TZ', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function getTodayString() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    function showToast(msg, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `px-4 py-3 rounded-xl shadow-2xl text-white font-bold text-xs flex items-center gap-2 transform transition-all duration-300 pointer-events-auto ${
+        type === 'error' ? 'bg-red-600' : 'bg-emerald-700'
+      }`;
+      toast.innerHTML = `<i data-lucide="${type === 'error' ? 'alert-triangle' : 'check-circle'}" class="w-4 h-4"></i> <span>${msg}</span>`;
+      container.appendChild(toast);
+      lucide.createIcons();
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function logAudit(action, details) {
+      const newEntry = {
+        id: `audit-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user: db.currentUser ? db.currentUser.name : 'Mfumo',
+        role: db.currentUser ? db.currentUser.role : 'System',
+        action,
+        details
+      };
+      db.auditLogs.unshift(newEntry);
+      saveStateToStorage();
+    }
+
+    // AUTHENTICATION & RBAC
+    function handleLogin(e) {
+      e.preventDefault();
+      const uInput = document.getElementById('login-username').value.trim();
+      const pInput = document.getElementById('login-password').value.trim();
+
+      const user = db.users.find(u => u.username === uInput && u.password === pInput);
+      if (user) {
+        db.currentUser = user;
+        logAudit('INGIA MFUMONI', `Mtumiaji ${user.name} ameingia kwenye mfumo`);
+        saveStateToStorage();
+        document.getElementById('login-view').classList.add('hidden');
+        document.getElementById('main-workspace').classList.remove('hidden');
+        setupUserWorkspace();
+        showToast(`Karibu sana, ${user.name}!`);
+      } else {
+        showToast('Username au Password sio sahihi!', 'error');
+      }
+    }
+
+    function quickLogin(username, password) {
+      document.getElementById('login-username').value = username;
+      document.getElementById('login-password').value = password;
+      document.getElementById('login-form').dispatchEvent(new Event('submit'));
+    }
+
+    function handleLogout() {
+      if (db.currentUser) {
+        logAudit('ONDOKA MFUMONI', `Mtumiaji ${db.currentUser.name} ameondoka`);
+      }
+      db.currentUser = null;
+      saveStateToStorage();
+      document.getElementById('main-workspace').classList.add('hidden');
+      document.getElementById('login-view').classList.remove('hidden');
+    }
+
+    function isAllowed(roles) {
+      if (!db.currentUser) return false;
+      if (db.currentUser.role === 'Administrator') return true;
+      return roles.includes(db.currentUser.role);
+    }
+
+    function setupUserWorkspace() {
+      document.getElementById('user-display-name').innerText = db.currentUser.name;
+      document.getElementById('user-display-role').innerText = db.currentUser.role;
+      document.getElementById('user-avatar').innerText = db.currentUser.name.charAt(0);
+
+      document.getElementById('nav-bidhaa').style.display = isAllowed(['Manager', 'Administrator']) ? 'flex' : 'none';
+      document.getElementById('nav-manunuzi').style.display = isAllowed(['Manager', 'Administrator']) ? 'flex' : 'none';
+      document.getElementById('nav-stock').style.display = isAllowed(['Manager', 'Administrator']) ? 'flex' : 'none';
+      document.getElementById('nav-faida').style.display = isAllowed(['Manager', 'Administrator']) ? 'flex' : 'none';
+      document.getElementById('nav-matumizi').style.display = isAllowed(['Manager', 'Administrator']) ? 'flex' : 'none';
+      document.getElementById('nav-wateja').style.display = isAllowed(['Manager', 'Administrator']) ? 'flex' : 'none';
+      document.getElementById('nav-ripoti').style.display = isAllowed(['Manager', 'Administrator']) ? 'flex' : 'none';
+      document.getElementById('nav-watumiaji').style.display = isAllowed(['Administrator']) ? 'flex' : 'none';
+      document.getElementById('nav-settings').style.display = isAllowed(['Administrator']) ? 'flex' : 'none';
+
+      switchTab('dashboard');
+    }
+
+    // NAVIGATION CONTROLLER
+    function switchTab(tabId) {
+      document.querySelectorAll('.module-view').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-gold-500', 'text-slate-950', 'font-bold');
+        btn.classList.add('hover:bg-navy-900', 'hover:text-white');
+      });
+
+      const activeMod = document.getElementById(`mod-${tabId}`);
+      if (activeMod) activeMod.classList.remove('hidden');
+
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) {
+        activeNav.classList.add('bg-gold-500', 'text-slate-950', 'font-bold');
+        activeNav.classList.remove('hover:bg-navy-900', 'hover:text-white');
+      }
+
+      document.getElementById('sidebar-menu').classList.add('-translate-x-full');
+
+      if (tabId === 'dashboard') renderDashboard();
+      if (tabId === 'mauzo') renderPosGrid();
+      if (tabId === 'bidhaa') renderProducts();
+      if (tabId === 'manunuzi') renderPurchases();
+      if (tabId === 'stock') renderStockMovements();
+      if (tabId === 'faida') renderProfitAndLoss();
+      if (tabId === 'matumizi') renderExpenses();
+      if (tabId === 'wateja') renderCustomersAndSuppliers();
+      if (tabId === 'ripoti') renderReportsModule();
+      if (tabId === 'watumiaji') renderUsersAndAudit();
+
+      lucide.createIcons();
+    }
+
+    function toggleMobileMenu() {
+      const menu = document.getElementById('sidebar-menu');
+      menu.classList.toggle('-translate-x-full');
+    }
+
+    // ACCESSIBILITY FONT RESIZER
+    function changeFontScale(delta) {
+      fontScaleLevel = Math.max(0, Math.min(2, fontScaleLevel + delta));
+      document.body.className = document.body.className.replace(/font-scale-\w+/g, '');
+      if (fontScaleLevel === 0) document.body.classList.add('font-scale-sm');
+      if (fontScaleLevel === 1) document.body.classList.add('font-scale-base');
+      if (fontScaleLevel === 2) document.body.classList.add('font-scale-lg');
+    }
+
+    function resetFontScale() {
+      fontScaleLevel = 1;
+      changeFontScale(0);
+    }
+
+    // LOGO DISPLAYS
+    function renderLogoDisplays() {
+      const headerSlot = document.getElementById('header-logo-container');
+      const loginSlot = document.getElementById('login-logo-preview');
+      const settingsSlot = document.getElementById('settings-logo-preview');
+      const rcptSlot = document.getElementById('receipt-logo-slot');
+
+      if (db.logoUrl) {
+        const imgTag = `<img src="${db.logoUrl}" class="w-full h-full object-contain p-0.5" />`;
+        if (headerSlot) headerSlot.innerHTML = imgTag;
+        if (loginSlot) loginSlot.innerHTML = imgTag;
+        if (settingsSlot) settingsSlot.innerHTML = imgTag;
+        if (rcptSlot) rcptSlot.innerHTML = imgTag;
+      }
+    }
+
+    function handleLogoUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          db.logoUrl = ev.target.result;
+          saveStateToStorage();
+          renderLogoDisplays();
+          showToast('Logo imebadilishwa kikamilifu!');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // MODULE 1: DASHBOARD
+    function renderDashboard() {
+      document.getElementById('dash-date').innerText = `Leo: ${formatDate(new Date())}`;
+
+      const totalSKUs = db.products.length;
+      const totalStockItems = db.products.reduce((sum, p) => sum + p.stock, 0);
+
+      const totalStockCostVal = db.batches.reduce((sum, b) => sum + (b.qtyRemaining * b.unitCost), 0);
+      const totalStockRetailVal = db.products.reduce((sum, p) => sum + (p.stock * p.sellingPrice), 0);
+
+      const todayStr = getTodayString();
+      const todaySales = db.sales.filter(s => s.date.startsWith(todayStr));
+      const todaySalesTotal = todaySales.reduce((sum, s) => sum + s.totalAmount, 0);
+      const todayGrossProfit = todaySales.reduce((sum, s) => sum + s.grossProfit, 0);
+
+      const todayPurchases = db.purchases
+        .filter(p => p.purchaseDate === todayStr)
+        .reduce((sum, p) => sum + p.totalCost, 0);
+
+      const currentMonthStr = new Date().toISOString().substring(0, 7);
+      const monthSales = db.sales.filter(s => s.date.substring(0, 7) === currentMonthStr);
+      const monthGrossProfit = monthSales.reduce((sum, s) => sum + s.grossProfit, 0);
+      const monthExpenses = db.expenses
+        .filter(e => e.date.substring(0, 7) === currentMonthStr)
+        .reduce((sum, e) => sum + e.amount, 0);
+
+      const monthNetProfit = monthGrossProfit - monthExpenses;
+
+      const outOfStock = db.products.filter(p => p.stock <= 0).length;
+      const lowStock = db.products.filter(p => p.stock > 0 && p.stock <= p.minStock).length;
+
+      document.getElementById('dash-skus').innerText = `${totalSKUs} SKUs`;
+      document.getElementById('dash-stock-qty').innerText = `${totalStockItems.toLocaleString()} vipande dukani`;
+      document.getElementById('dash-stock-cost').innerText = formatTsh(totalStockCostVal);
+      document.getElementById('dash-stock-retail').innerText = formatTsh(totalStockRetailVal);
+      document.getElementById('dash-expected-profit').innerText = `Tarajiwa: +${formatTsh(totalStockRetailVal - totalStockCostVal)}`;
+      document.getElementById('dash-sales-today').innerText = formatTsh(todaySalesTotal);
+      document.getElementById('dash-sales-count').innerText = `${todaySales.length} Miamala`;
+      document.getElementById('dash-purchases-today').innerText = formatTsh(todayPurchases);
+      document.getElementById('dash-gross-today').innerText = formatTsh(todayGrossProfit);
+      document.getElementById('dash-profit-month').innerText = formatTsh(monthNetProfit);
+      document.getElementById('dash-expenses-month').innerText = `Matumizi: ${formatTsh(monthExpenses)}`;
+      document.getElementById('dash-out-count').innerText = `${outOfStock} Zimeisha`;
+      document.getElementById('dash-low-count').innerText = `${lowStock} Zinakaribia`;
+
+      updateDashboardChart('Daily');
+    }
+
+    function updateDashboardChart(period) {
+      document.getElementById('btn-chart-daily').className = 'px-3 py-1 rounded-lg font-bold ' + (period === 'Daily' ? 'bg-gold-500 text-slate-950 shadow-sm' : 'text-slate-600 hover:text-slate-950');
+      document.getElementById('btn-chart-weekly').className = 'px-3 py-1 rounded-lg font-bold ' + (period === 'Weekly' ? 'bg-gold-500 text-slate-950 shadow-sm' : 'text-slate-600 hover:text-slate-950');
+      document.getElementById('btn-chart-monthly').className = 'px-3 py-1 rounded-lg font-bold ' + (period === 'Monthly' ? 'bg-gold-500 text-slate-950 shadow-sm' : 'text-slate-600 hover:text-slate-950');
+
+      let labels = [];
+      let salesData = [];
+      let profitData = [];
+
+      if (period === 'Daily') {
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          const dayStr = d.toISOString().split('T')[0];
+          labels.push(d.toLocaleDateString('sw-TZ', { weekday: 'short' }));
+          
+          const daySalesList = db.sales.filter(s => s.date.startsWith(dayStr));
+          salesData.push(daySalesList.reduce((sum, s) => sum + s.totalAmount, 0));
+          profitData.push(daySalesList.reduce((sum, s) => sum + s.grossProfit, 0));
+        }
+      } else if (period === 'Weekly') {
+        labels = ['Wiki 1', 'Wiki 2', 'Wiki 3', 'Wiki 4'];
+        salesData = [120000, 240000, 180000, 310000];
+        profitData = [35000, 70000, 50000, 95000];
+      } else {
+        labels = ['Okt', 'Nov', 'Des', 'Jan', 'Feb', 'Machi'];
+        salesData = [450000, 620000, 890000, 710000, 530000, 820000];
+        profitData = [120000, 180000, 270000, 210000, 160000, 250000];
+      }
+
+      const ctx = document.getElementById('salesProfitChart').getContext('2d');
+      if (dashboardChartInstance) dashboardChartInstance.destroy();
+
+      dashboardChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Mauzo (Sales)',
+              data: salesData,
+              backgroundColor: '#F59E0B',
+              borderRadius: 6
+            },
+            {
+              label: 'Faida Ghafi (Profit)',
+              data: profitData,
+              backgroundColor: '#047857',
+              borderRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' }
+          },
+          scales: {
+            y: {
+              ticks: {
+                callback: (value) => 'Tsh ' + value.toLocaleString()
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // MODULE 2: POS MAUZO ENGINE
+    let posSelectedCat = 'All';
+
+    function renderPosGrid() {
+      const searchVal = (document.getElementById('pos-search-input').value || '').toLowerCase();
+      
+      const cats = ['All', 'Madaftari', 'Kalamu & Penseli', 'Karatasi & Rim', 'Mafaili', 'Vifaa vya Ofisini'];
+      const catPillsSlot = document.getElementById('pos-category-pills');
+      catPillsSlot.innerHTML = cats.map(c => `
+        <button onclick="setPosCategory('${c}')" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${
+          posSelectedCat === c ? 'bg-gold-500 text-slate-950 shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+        }">${c === 'All' ? 'Vyote' : c}</button>
+      `).join('');
+
+      const custSelect = document.getElementById('pos-customer-select');
+      custSelect.innerHTML = `<option value="">-- Walk-in Customer --</option>` + db.customers.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
+      const grid = document.getElementById('pos-product-grid');
+      const filtered = db.products.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(searchVal) || p.barcode.includes(searchVal);
+        const matchesCat = posSelectedCat === 'All' || p.category === posSelectedCat;
+        return matchesSearch && matchesCat;
+      });
+
+      grid.innerHTML = filtered.map(p => `
+        <button onclick="addToCart('${p.id}')" ${p.stock <= 0 ? 'disabled' : ''} class="p-3 rounded-2xl border text-left flex flex-col justify-between transition transform active:scale-95 relative group ${
+          p.stock <= 0 ? 'bg-slate-50 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-gold-400 hover:shadow-md'
+        }">
+          <div>
+            <div class="flex items-start justify-between gap-1 mb-1">
+              <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wide truncate">${p.category}</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${
+                p.stock <= 0 ? 'bg-red-100 text-red-700' : p.stock <= p.minStock ? 'bg-gold-100 text-gold-800' : 'bg-emerald-100 text-emerald-800'
+              }">${p.stock <= 0 ? 'Hakuna' : `${p.stock} ${p.unit}`}</span>
+            </div>
+            <h4 class="font-bold text-xs text-slate-900 line-clamp-2">${p.name}</h4>
+          </div>
+
+          <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span class="font-black text-xs text-slate-900">${formatTsh(p.sellingPrice)}</span>
+            <div class="w-6 h-6 rounded-lg bg-gold-500 group-hover:bg-gold-400 text-slate-950 flex items-center justify-center font-bold text-xs">+</div>
+          </div>
+        </button>
+      `).join('');
+
+      renderCart();
+    }
+
+    function setPosCategory(cat) {
+      posSelectedCat = cat;
+      renderPosGrid();
+    }
+
+    function addToCart(productId) {
+      const product = db.products.find(p => p.id === productId);
+      if (!product || product.stock <= 0) {
+        showToast('Bidhaa hii haina stock iliyopo!', 'error');
+        return;
+      }
+
+      const existing = cart.find(c => c.id === productId);
+      if (existing) {
+        if (existing.qty + 1 > product.stock) {
+          showToast(`Imefikia kiwango cha juu cha stock (${product.stock})!`, 'error');
+          return;
+        }
+        existing.qty += 1;
+      } else {
+        cart.push({ ...product, qty: 1 });
+      }
+
+      renderCart();
+    }
+
+    function updateCartQty(productId, newQty) {
+      const product = db.products.find(p => p.id === productId);
+      if (!product) return;
+
+      if (newQty > product.stock) {
+        showToast(`Huwezi kuuza zaidi ya stock iliyopo (${product.stock})!`, 'error');
+        return;
+      }
+
+      if (newQty <= 0) {
+        cart = cart.filter(c => c.id !== productId);
+      } else {
+        const item = cart.find(c => c.id === productId);
+        if (item) item.qty = newQty;
+      }
+
+      renderCart();
+    }
+
+    function clearCart() {
+      cart = [];
+      renderCart();
+    }
+
+    function renderCart() {
+      const container = document.getElementById('pos-cart-list');
+      if (cart.length === 0) {
+        container.innerHTML = `<div class="py-8 text-center text-slate-500 text-xs italic">Kikapu kiko wazi. Bonyeza bidhaa kuongeza.</div>`;
+      } else {
+        container.innerHTML = cart.map(item => `
+          <div class="p-2 rounded-xl bg-navy-900 border border-navy-800 flex items-center justify-between text-xs">
+            <div class="flex-1 pr-2 truncate">
+              <p class="font-bold text-slate-200 truncate">${item.name}</p>
+              <p class="text-[10px] text-gold-400">${formatTsh(item.sellingPrice)} / ${item.unit}</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="flex items-center bg-navy-950 rounded-lg border border-navy-800">
+                <button onclick="updateCartQty('${item.id}', ${item.qty - 1})" class="px-2 py-0.5 font-bold hover:bg-navy-800">-</button>
+                <span class="px-2 font-bold text-white text-xs">${item.qty}</span>
+                <button onclick="updateCartQty('${item.id}', ${item.qty + 1})" class="px-2 py-0.5 font-bold hover:bg-navy-800">+</button>
+              </div>
+
+              <span class="font-bold text-white text-xs w-16 text-right">${(item.sellingPrice * item.qty).toLocaleString()}</span>
+              <button onclick="updateCartQty('${item.id}', 0)" class="text-slate-500 hover:text-red-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      calculateCartTotals();
+      lucide.createIcons();
+    }
+
+    function calculateCartTotals() {
+      const subtotal = cart.reduce((sum, item) => sum + (item.sellingPrice * item.qty), 0);
+      const discount = Number(document.getElementById('pos-discount').value) || 0;
+      const grandTotal = Math.max(0, subtotal - discount);
+      const paid = Number(document.getElementById('pos-amount-paid').value) || 0;
+      const change = Math.max(0, paid - grandTotal);
+
+      document.getElementById('pos-subtotal-text').innerText = formatTsh(subtotal);
+      document.getElementById('pos-discount-text').innerText = `-${formatTsh(discount)}`;
+      document.getElementById('pos-grand-text').innerText = formatTsh(grandTotal);
+      document.getElementById('pos-change-text').innerText = formatTsh(change);
+    }
+
+    function executeCompleteSale() {
+      if (cart.length === 0) {
+        showToast('Kikapu cha mauzo kiko wazi!', 'error');
+        return;
+      }
+
+      const subtotal = cart.reduce((sum, item) => sum + (item.sellingPrice * item.qty), 0);
+      const discount = Number(document.getElementById('pos-discount').value) || 0;
+      const grandTotal = Math.max(0, subtotal - discount);
+      const paid = Number(document.getElementById('pos-amount-paid').value) || 0;
+      const paymentMethod = document.getElementById('pos-payment-method').value;
+      const customerName = document.getElementById('pos-customer-select').value || 'Walk-in Customer';
+
+      if (paymentMethod !== 'Mkopo' && paid < grandTotal) {
+        showToast('Kiasi kilicholipwa ni pungufu ya jumla!', 'error');
+        return;
+      }
+
+      let saleItemsWithFifoCogs = [];
+      let totalSaleCogs = 0;
+
+      for (const item of cart) {
+        let qtyNeeded = item.qty;
+        let itemTotalCogs = 0;
+
+        const productBatches = db.batches
+          .filter(b => b.productId === item.id && b.qtyRemaining > 0)
+          .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        for (let b of productBatches) {
+          if (qtyNeeded <= 0) break;
+
+          const deduct = Math.min(b.qtyRemaining, qtyNeeded);
+          b.qtyRemaining -= deduct;
+          qtyNeeded -= deduct;
+          itemTotalCogs += deduct * b.unitCost;
+        }
+
+        if (qtyNeeded > 0) {
+          itemTotalCogs += qtyNeeded * item.costPrice;
+        }
+
+        totalSaleCogs += itemTotalCogs;
+
+        saleItemsWithFifoCogs.push({
+          productId: item.id,
+          name: item.name,
+          unit: item.unit,
+          qty: item.qty,
+          sellingPrice: item.sellingPrice,
+          subtotal: item.sellingPrice * item.qty,
+          cogs: itemTotalCogs,
+          profit: (item.sellingPrice * item.qty) - itemTotalCogs
+        });
+
+        const prodObj = db.products.find(p => p.id === item.id);
+        if (prodObj) prodObj.stock -= item.qty;
+      }
+
+      const receiptNo = `INV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
+      const debtAmount = paymentMethod === 'Mkopo' ? grandTotal : (paid < grandTotal ? grandTotal - paid : 0);
+
+      const newSale = {
+        id: `sale-${Date.now()}`,
+        receiptNo,
+        date: new Date().toISOString(),
+        cashier: db.currentUser ? db.currentUser.name : 'Cashier',
+        customerName,
+        items: saleItemsWithFifoCogs,
+        subtotal,
+        discount,
+        totalAmount: grandTotal,
+        cogs: totalSaleCogs,
+        grossProfit: grandTotal - totalSaleCogs,
+        paymentMethod,
+        amountPaid: paid,
+        change: Math.max(0, paid - grandTotal),
+        debt: debtAmount
+      };
+
+      if (debtAmount > 0 && customerName !== 'Walk-in Customer') {
+        const custObj = db.customers.find(c => c.name === customerName);
+        if (custObj) custObj.debt = (custObj.debt || 0) + debtAmount;
+      }
+
+      cart.forEach(item => {
+        db.stockMovements.unshift({
+          id: `mvt-${Date.now()}-${item.id}`,
+          date: new Date().toISOString(),
+          productName: item.name,
+          type: 'MAUZO',
+          qty: -item.qty,
+          notes: `Mauzo Risiti #${receiptNo}`
+        });
+      });
+
+      db.sales.unshift(newSale);
+      logAudit('KUFANYA MAUZO', `Ameuza bidhaa za ${formatTsh(grandTotal)} (Risiti #${receiptNo})`);
+      saveStateToStorage();
+
+      showToast(`Mauzo yamekamilika! Risiti #${receiptNo}`);
+
+      openReceiptModal(newSale);
+
+      cart = [];
+      document.getElementById('pos-discount').value = '';
+      document.getElementById('pos-amount-paid').value = '';
+      renderPosGrid();
+    }
+
+    function openReceiptModal(sale) {
+      document.getElementById('rcpt-no').innerText = `RISITI #${sale.receiptNo}`;
+      document.getElementById('rcpt-date').innerText = `Tarehe: ${formatDate(sale.date)}`;
+      document.getElementById('rcpt-cashier').innerText = `Cashier: ${sale.cashier}`;
+      document.getElementById('rcpt-customer').innerText = `Mteja: ${sale.customerName}`;
+
+      const itemsBody = document.getElementById('rcpt-items-body');
+      itemsBody.innerHTML = sale.items.map(i => `
+        <tr>
+          <td class="py-1">${i.name}</td>
+          <td class="py-1 text-center">${i.qty}</td>
+          <td class="py-1 text-right">${i.sellingPrice.toLocaleString()}</td>
+          <td class="py-1 text-right">${i.subtotal.toLocaleString()}</td>
+        </tr>
+      `).join('');
+
+      document.getElementById('rcpt-subtotal').innerText = formatTsh(sale.subtotal);
+      document.getElementById('rcpt-discount').innerText = `-${formatTsh(sale.discount)}`;
+      document.getElementById('rcpt-grand').innerText = formatTsh(sale.totalAmount);
+      document.getElementById('rcpt-method').innerText = sale.paymentMethod;
+      document.getElementById('rcpt-paid').innerText = formatTsh(sale.amountPaid);
+      document.getElementById('rcpt-change').innerText = formatTsh(sale.change);
+
+      document.getElementById('receipt-modal').classList.remove('hidden');
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receipt-modal').classList.add('hidden');
+    }
+
+    // MODULE 3: PRODUCT MANAGEMENT
+    function renderProducts() {
+      const tbody = document.getElementById('product-table-body');
+      tbody.innerHTML = db.products.map(p => {
+        const profit = p.sellingPrice - p.costPrice;
+        const margin = p.costPrice > 0 ? ((profit / p.costPrice) * 100).toFixed(1) : 0;
+
+        return `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-3 font-mono font-bold text-slate-600">${p.barcode}</td>
+            <td class="p-3 font-bold text-slate-900">${p.name}</td>
+            <td class="p-3 text-slate-600">${p.category}</td>
+            <td class="p-3 text-slate-600">${p.unit}</td>
+            <td class="p-3 text-right font-medium">${formatTsh(p.costPrice)}</td>
+            <td class="p-3 text-right font-bold text-slate-900">${formatTsh(p.sellingPrice)}</td>
+            <td class="p-3 text-right font-bold text-emerald-700">${formatTsh(profit)}</td>
+            <td class="p-3 text-right font-bold text-gold-700">${margin}%</td>
+            <td class="p-3 text-center">
+              <span class="px-2 py-1 rounded font-bold text-[10px] ${
+                p.stock <= 0 ? 'bg-red-100 text-red-700' : p.stock <= p.minStock ? 'bg-gold-100 text-gold-800' : 'bg-emerald-100 text-emerald-800'
+              }">${p.stock} ${p.unit}</span>
+            </td>
+            <td class="p-3 text-center">
+              <button onclick="openProductModal('${p.id}')" class="p-1 rounded text-slate-600 hover:text-gold-600"><i data-lucide="edit" class="w-4 h-4"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function openProductModal(productId = null) {
+      const title = document.getElementById('product-modal-title');
+      const stockContainer = document.getElementById('prod-stock-field-container');
+
+      if (productId) {
+        const p = db.products.find(x => x.id === productId);
+        title.innerText = 'Badilisha Taarifa za Bidhaa';
+        document.getElementById('prod-form-id').value = p.id;
+        document.getElementById('prod-barcode').value = p.barcode;
+        document.getElementById('prod-name').value = p.name;
+        document.getElementById('prod-category').value = p.category;
+        document.getElementById('prod-unit').value = p.unit;
+        document.getElementById('prod-cost').value = p.costPrice;
+        document.getElementById('prod-price').value = p.sellingPrice;
+        document.getElementById('prod-min-stock').value = p.minStock;
+        stockContainer.style.display = 'none';
+      } else {
+        title.innerText = 'Sajili Bidhaa Mpya';
+        document.getElementById('prod-form-id').value = '';
+        document.getElementById('prod-barcode').value = `600${Math.floor(1000 + Math.random() * 9000)}`;
+        document.getElementById('prod-name').value = '';
+        document.getElementById('prod-cost').value = '';
+        document.getElementById('prod-price').value = '';
+        document.getElementById('prod-stock').value = '';
+        document.getElementById('prod-min-stock').value = 5;
+        stockContainer.style.display = 'block';
+      }
+
+      document.getElementById('product-modal').classList.remove('hidden');
+    }
+
+    function closeProductModal() {
+      document.getElementById('product-modal').classList.add('hidden');
+    }
+
+    function handleSaveProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById('prod-form-id').value;
+      const barcode = document.getElementById('prod-barcode').value.trim();
+      const name = document.getElementById('prod-name').value.trim();
+      const category = document.getElementById('prod-category').value;
+      const unit = document.getElementById('prod-unit').value;
+      const cost = Number(document.getElementById('prod-cost').value) || 0;
+      const price = Number(document.getElementById('prod-price').value) || 0;
+      const minStock = Number(document.getElementById('prod-min-stock').value) || 5;
+
+      if (id) {
+        const p = db.products.find(x => x.id === id);
+        if (p) {
+          p.barcode = barcode;
+          p.name = name;
+          p.category = category;
+          p.unit = unit;
+          p.costPrice = cost;
+          p.sellingPrice = price;
+          p.minStock = minStock;
+        }
+        logAudit('KUBADILISHA BIDHAA', `Amebadilisha: ${name}`);
+        showToast('Bidhaa imebadilishwa kikamilifu!');
+      } else {
+        const stockQty = Number(document.getElementById('prod-stock').value) || 0;
+        const newId = `p-${Date.now()}`;
+        const newProd = { id: newId, barcode, name, category, unit, costPrice: cost, sellingPrice: price, stock: stockQty, minStock };
+        
+        db.batches.push({
+          id: `batch-${Date.now()}`,
+          productId: newId,
+          qtyRemaining: stockQty,
+          unitCost: cost,
+          date: new Date().toISOString()
+        });
+
+        db.products.unshift(newProd);
+        db.stockMovements.unshift({
+          id: `mvt-${Date.now()}`,
+          date: new Date().toISOString(),
+          productName: name,
+          type: 'USAJILI MPYA',
+          qty: stockQty,
+          notes: 'Initial Stock Onboarding'
+        });
+
+        logAudit('KUSAJILI BIDHAA', `Amesajili bidhaa mpya: ${name}`);
+        showToast('Bidhaa mpya imesajiliwa kikamilifu!');
+      }
+
+      saveStateToStorage();
+      closeProductModal();
+      renderProducts();
+    }
+
+    // MODULE 4: PURCHASES & FIFO BATCH CREATION
+    function renderPurchases() {
+      const tbody = document.getElementById('purchases-table-body');
+      tbody.innerHTML = db.purchases.map(p => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-3 font-mono font-bold text-slate-700">${p.receiptNo}</td>
+          <td class="p-3 text-slate-600">${p.purchaseDate}</td>
+          <td class="p-3 font-bold text-slate-900">${p.supplierName}</td>
+          <td class="p-3 text-slate-800">${p.productName}</td>
+          <td class="p-3 text-center font-bold">${p.qty}</td>
+          <td class="p-3 text-right">${formatTsh(p.unitCost)}</td>
+          <td class="p-3 text-right text-slate-500">${formatTsh(p.extraCosts)}</td>
+          <td class="p-3 text-right font-black text-slate-900">${formatTsh(p.totalCost)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function openPurchaseModal() {
+      const select = document.getElementById('pur-product-id');
+      select.innerHTML = `<option value="">-- Chagua Bidhaa --</option>` + db.products.map(p => `<option value="${p.id}">${p.name} (Stock: ${p.stock})</option>`).join('');
+      document.getElementById('purchase-modal').classList.remove('hidden');
+    }
+
+    function closePurchaseModal() {
+      document.getElementById('purchase-modal').classList.add('hidden');
+    }
+
+    function handleSavePurchase(e) {
+      e.preventDefault();
+      const productId = document.getElementById('pur-product-id').value;
+      const supplierName = document.getElementById('pur-supplier').value.trim() || 'Muhibu Stationers Ltd';
+      const qty = Number(document.getElementById('pur-qty').value) || 0;
+      const unitCost = Number(document.getElementById('pur-unit-cost').value) || 0;
+      const extraCosts = Number(document.getElementById('pur-extra-cost').value) || 0;
+
+      const product = db.products.find(p => p.id === productId);
+      if (!product || qty <= 0 || unitCost <= 0) {
+        showToast('Tafadhali jaza taarifa sahihi!', 'error');
+        return;
+      }
+
+      const totalBaseCost = qty * unitCost;
+      const totalCostWithExtra = totalBaseCost + extraCosts;
+      const effectiveUnitCost = totalCostWithExtra / qty;
+
+      const receiptNo = `PUR-${Math.floor(100000 + Math.random() * 900000)}`;
+
+      db.purchases.unshift({
+        id: `pur-${Date.now()}`,
+        receiptNo,
+        purchaseDate: getTodayString(),
+        supplierName,
+        productId,
+        productName: product.name,
+        qty,
+        unitCost,
+        extraCosts,
+        totalCost: totalCostWithExtra
+      });
+
+      db.batches.push({
+        id: `batch-${Date.now()}`,
+        productId,
+        qtyRemaining: qty,
+        unitCost: effectiveUnitCost,
+        date: new Date().toISOString()
+      });
+
+      product.stock += qty;
+      product.costPrice = unitCost;
+
+      db.stockMovements.unshift({
+        id: `mvt-${Date.now()}`,
+        date: new Date().toISOString(),
+        productName: product.name,
+        type: 'MANUNUZI',
+        qty,
+        notes: `Ununuzi kutoka: ${supplierName} (Risiti #${receiptNo})`
+      });
+
+      logAudit('KUREKODI UNUNUZI', `Amesajili ununuzi wa ${product.name} (Qty: ${qty})`);
+      saveStateToStorage();
+      closePurchaseModal();
+      renderPurchases();
+      showToast('Ununuzi umerekodiwa na stock imeongezeka!');
+    }
+
+    // MODULE 5: STOCK MOVEMENTS & ADJUSTMENTS
+    function renderStockMovements() {
+      const tbody = document.getElementById('stock-movements-body');
+      tbody.innerHTML = db.stockMovements.map(mvt => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-3 text-slate-500">${formatDate(mvt.date)}</td>
+          <td class="p-3 font-bold text-slate-900">${mvt.productName}</td>
+          <td class="p-3">
+            <span class="px-2 py-0.5 rounded font-bold text-[10px] ${
+              mvt.type === 'MAUZO' ? 'bg-gold-100 text-gold-800' :
+              mvt.type === 'MANUNUZI' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+            }">${mvt.type}</span>
+          </td>
+          <td class="p-3 text-center font-black ${mvt.qty > 0 ? 'text-emerald-600' : 'text-red-600'}">
+            ${mvt.qty > 0 ? `+${mvt.qty}` : mvt.qty}
+          </td>
+          <td class="p-3 text-slate-600">${mvt.notes}</td>
+        </tr>
+      `).join('');
+    }
+
+    function openStockAdjustModal() {
+      const select = document.getElementById('adj-product-id');
+      select.innerHTML = `<option value="">-- Chagua Bidhaa --</option>` + db.products.map(p => `<option value="${p.id}">${p.name} (Iliyopo: ${p.stock})</option>`).join('');
+      document.getElementById('stock-adjust-modal').classList.remove('hidden');
+    }
+
+    function closeStockAdjustModal() {
+      document.getElementById('stock-adjust-modal').classList.add('hidden');
+    }
+
+    function handleSaveStockAdjust(e) {
+      e.preventDefault();
+      const productId = document.getElementById('adj-product-id').value;
+      const qty = Number(document.getElementById('adj-qty').value) || 0;
+      const reason = document.getElementById('adj-reason').value.trim();
+
+      const product = db.products.find(p => p.id === productId);
+      if (!product || qty <= 0 || qty > product.stock) {
+        showToast('Idadi haiwezi kuzidi stock iliyopo!', 'error');
+        return;
+      }
+
+      let remaining = qty;
+      const productBatches = db.batches
+        .filter(b => b.productId === product.id && b.qtyRemaining > 0)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      for (let b of productBatches) {
+        if (remaining <= 0) break;
+        const deduct = Math.min(b.qtyRemaining, remaining);
+        b.qtyRemaining -= deduct;
+        remaining -= deduct;
+      }
+
+      product.stock -= qty;
+
+      db.stockMovements.unshift({
+        id: `mvt-${Date.now()}`,
+        date: new Date().toISOString(),
+        productName: product.name,
+        type: 'BIDHAA ZILIZOHARIBIKA',
+        qty: -qty,
+        notes: `Uharibifu: ${reason}`
+      });
+
+      logAudit('UPUNGUFU WA STOCK', `Ameondoa bidhaa zilizoharibika: ${product.name} (Qty: ${qty})`);
+      saveStateToStorage();
+      closeStockAdjustModal();
+      renderStockMovements();
+      showToast('Upungufu wa stock umerekodiwa!');
+    }
+
+    // MODULE 6: PROFIT & LOSS (STRICT FIFO)
+    function renderProfitAndLoss() {
+      const filter = document.getElementById('pnl-filter').value;
+      const todayStr = getTodayString();
+      const monthStr = new Date().toISOString().substring(0, 7);
+
+      let filteredSales = db.sales;
+      if (filter === 'Today') filteredSales = db.sales.filter(s => s.date.startsWith(todayStr));
+      if (filter === 'Month') filteredSales = db.sales.filter(s => s.date.substring(0, 7) === monthStr);
+
+      const revenue = filteredSales.reduce((sum, s) => sum + s.totalAmount, 0);
+      const cogs = filteredSales.reduce((sum, s) => sum + s.cogs, 0);
+      const gross = filteredSales.reduce((sum, s) => sum + s.grossProfit, 0);
+
+      const expList = filter === 'Today' ? db.expenses.filter(e => e.date === todayStr) :
+                      filter === 'Month' ? db.expenses.filter(e => e.date.substring(0, 7) === monthStr) : db.expenses;
+      const expensesTotal = expList.reduce((sum, e) => sum + e.amount, 0);
+
+      document.getElementById('pnl-revenue').innerText = formatTsh(revenue);
+      document.getElementById('pnl-cogs').innerText = formatTsh(cogs);
+      document.getElementById('pnl-gross').innerText = formatTsh(gross);
+      document.getElementById('pnl-net').innerText = formatTsh(gross - expensesTotal);
+
+      const tbody = document.getElementById('pnl-sales-body');
+      tbody.innerHTML = filteredSales.map(s => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-2.5 font-mono font-bold text-slate-700">${s.receiptNo}</td>
+          <td class="p-2.5 text-slate-500">${formatDate(s.date)}</td>
+          <td class="p-2.5 font-semibold">${s.customerName}</td>
+          <td class="p-2.5 text-right font-bold">${formatTsh(s.totalAmount)}</td>
+          <td class="p-2.5 text-right text-slate-600">${formatTsh(s.cogs)}</td>
+          <td class="p-2.5 text-right font-black text-emerald-700">${formatTsh(s.grossProfit)}</td>
+        </tr>
+      `).join('');
+    }
+
+    // MODULE 7: MATUMIZI (EXPENSES)
+    function renderExpenses() {
+      const tbody = document.getElementById('expenses-table-body');
+      tbody.innerHTML = db.expenses.map(e => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-3 text-slate-600">${e.date}</td>
+          <td class="p-3 font-bold text-slate-900">${e.category}</td>
+          <td class="p-3 text-slate-600">${e.notes || '-'}</td>
+          <td class="p-3 text-right font-black text-red-600">${formatTsh(e.amount)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function openExpenseModal() {
+      document.getElementById('expense-modal').classList.remove('hidden');
+    }
+
+    function closeExpenseModal() {
+      document.getElementById('expense-modal').classList.add('hidden');
+    }
+
+    function handleSaveExpense(e) {
+      e.preventDefault();
+      const category = document.getElementById('exp-category').value;
+      const amount = Number(document.getElementById('exp-amount').value) || 0;
+      const notes = document.getElementById('exp-notes').value.trim();
+
+      if (amount <= 0) {
+        showToast('Weka kiasi halali!', 'error');
+        return;
+      }
+
+      db.expenses.unshift({
+        id: `exp-${Date.now()}`,
+        date: getTodayString(),
+        category,
+        amount,
+        notes
+      });
+
+      logAudit('KUREKODI MATUMIZI', `Amesajili matumizi: ${category} (${formatTsh(amount)})`);
+      saveStateToStorage();
+      closeExpenseModal();
+      renderExpenses();
+      showToast('Matumizi yamekamilika kurekodiwa!');
+    }
+
+    // MODULE 8: WATEJA & SUPPLIERS (ENHANCED WITH CALL, SMS, EDIT, DELETE & ADD)
+    function renderCustomersAndSuppliers() {
+      const custBody = document.getElementById('customers-table-body');
+      
+      if (db.customers.length === 0) {
+        custBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Hakuna wateja waliosajiliwa. Bonyeza "+ Sajili Mteja Mpya".</td></tr>`;
+      } else {
+        custBody.innerHTML = db.customers.map(c => {
+          const cleanPhone = (c.phone || '').replace(/\s+/g, '');
+
+          return `
+            <tr class="hover:bg-slate-50 transition">
+              <td class="p-2.5 font-bold text-slate-900">${c.name}</td>
+              <td class="p-2.5 text-slate-700 font-mono">${c.phone}</td>
+              <td class="p-2.5 text-slate-600">${c.location || '-'}</td>
+              <td class="p-2.5 text-right font-black ${c.debt > 0 ? 'text-red-600' : 'text-slate-700'}">${formatTsh(c.debt)}</td>
+              <td class="p-2.5">
+                <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                  <!-- CALL BUTTON -->
+                  <a href="tel:${cleanPhone}" title="Piga Simu" class="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition inline-flex items-center gap-1 font-bold text-[10px]">
+                    <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call
+                  </a>
+
+                  <!-- SMS BUTTON -->
+                  <a href="sms:${cleanPhone}" title="Tuma SMS" class="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition inline-flex items-center gap-1 font-bold text-[10px]">
+                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i> SMS
+                  </a>
+
+                  <!-- DEBT PAY BUTTON -->
+                  ${c.debt > 0 ? `
+                    <button onclick="openDebtModal('${c.id}')" title="Lipa Deni" class="p-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-lg transition font-bold text-[10px]">
+                      Lipa Deni
+                    </button>
+                  ` : ''}
+
+                  <!-- EDIT BUTTON -->
+                  <button onclick="openCustomerModal('${c.id}')" title="Badilisha Mteja" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition">
+                    <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+                  </button>
+
+                  <!-- DELETE BUTTON -->
+                  <button onclick="deleteCustomer('${c.id}')" title="Futa Mteja" class="p-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const supGrid = document.getElementById('suppliers-grid');
+      supGrid.innerHTML = db.suppliers.map(s => `
+        <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex justify-between items-center text-xs">
+          <div>
+            <p class="font-bold text-slate-900">${s.name}</p>
+            <p class="text-slate-500 font-mono">${s.phone}</p>
+            <p class="text-[10px] text-slate-400">${s.location}</p>
+          </div>
+          <div class="flex items-center gap-1">
+            <a href="tel:${(s.phone||'').replace(/\s+/g, '')}" class="p-1.5 bg-emerald-600 text-white rounded-lg font-bold text-[10px] flex items-center gap-1">
+              <i data-lucide="phone" class="w-3 h-3"></i> Call
+            </a>
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    // CUSTOMER MANAGEMENT MODALS & HANDLERS
+    function openCustomerModal(custId = null) {
+      const title = document.getElementById('customer-modal-title');
+      if (custId) {
+        const c = db.customers.find(x => x.id === custId);
+        if (!c) return;
+        title.innerText = 'Badilisha Taarifa za Mteja';
+        document.getElementById('cust-form-id').value = c.id;
+        document.getElementById('cust-name').value = c.name;
+        document.getElementById('cust-phone').value = c.phone;
+        document.getElementById('cust-location').value = c.location || '';
+        document.getElementById('cust-debt').value = c.debt || 0;
+      } else {
+        title.innerText = 'Sajili Mteja Mpya';
+        document.getElementById('cust-form-id').value = '';
+        document.getElementById('cust-name').value = '';
+        document.getElementById('cust-phone').value = '';
+        document.getElementById('cust-location').value = '';
+        document.getElementById('cust-debt').value = 0;
+      }
+      document.getElementById('customer-modal').classList.remove('hidden');
+    }
+
+    function closeCustomerModal() {
+      document.getElementById('customer-modal').classList.add('hidden');
+    }
+
+    function handleSaveCustomer(e) {
+      e.preventDefault();
+      const id = document.getElementById('cust-form-id').value;
+      const name = document.getElementById('cust-name').value.trim();
+      const phone = document.getElementById('cust-phone').value.trim();
+      const location = document.getElementById('cust-location').value.trim();
+      const debt = Number(document.getElementById('cust-debt').value) || 0;
+
+      if (id) {
+        const c = db.customers.find(x => x.id === id);
+        if (c) {
+          c.name = name;
+          c.phone = phone;
+          c.location = location;
+          c.debt = debt;
+        }
+        logAudit('KUBADILISHA MTEJA', `Amebadilisha taarifa za mteja: ${name}`);
+        showToast('Taarifa za mteja zimebadilishwa!');
+      } else {
+        const newCust = {
+          id: `cust-${Date.now()}`,
+          name,
+          phone,
+          location,
+          debt
+        };
+        db.customers.unshift(newCust);
+        logAudit('ONGEZA MTEJA', `Amesajili mteja mpya: ${name}`);
+        showToast('Mteja mpya amesajiliwa kikamilifu!');
+      }
+
+      saveStateToStorage();
+      closeCustomerModal();
+      renderCustomersAndSuppliers();
+    }
+
+    function deleteCustomer(custId) {
+      const c = db.customers.find(x => x.id === custId);
+      if (!c) return;
+
+      if (confirm(`Je, una uhakika unataka kumfuta mteja "${c.name}"?`)) {
+        db.customers = db.customers.filter(x => x.id !== custId);
+        logAudit('FUTA MTEJA', `Amemfuta mteja: ${c.name}`);
+        saveStateToStorage();
+        renderCustomersAndSuppliers();
+        showToast(`Mteja ${c.name} amefutwa!`, 'error');
+      }
+    }
+
+    function openDebtModal(custId) {
+      const c = db.customers.find(x => x.id === custId);
+      if (!c) return;
+      document.getElementById('debt-customer-id').value = c.id;
+      document.getElementById('debt-cust-name').innerText = c.name;
+      document.getElementById('debt-cust-amount').innerText = formatTsh(c.debt);
+      document.getElementById('debt-pay-amount').value = c.debt;
+      document.getElementById('debt-modal').classList.remove('hidden');
+    }
+
+    function closeDebtModal() {
+      document.getElementById('debt-modal').classList.add('hidden');
+    }
+
+    function handleSaveDebtPayment(e) {
+      e.preventDefault();
+      const custId = document.getElementById('debt-customer-id').value;
+      const amount = Number(document.getElementById('debt-pay-amount').value) || 0;
+
+      const c = db.customers.find(x => x.id === custId);
+      if (!c || amount <= 0 || amount > c.debt) {
+        showToast('Kiasi kisichosahihi!', 'error');
+        return;
+      }
+
+      c.debt -= amount;
+      logAudit('MALIPO YA DENI', `Mteja ${c.name} amelipa deni la ${formatTsh(amount)}`);
+      saveStateToStorage();
+      closeDebtModal();
+      renderCustomersAndSuppliers();
+      showToast('Malipo ya deni yamekamilika!');
+    }
+
+    // MODULE 9: RIPOTI ZOTE & EXPORTS
+    function selectReportType(type) {
+      currentReportTab = type;
+      document.querySelectorAll('.rep-tab-btn').forEach(btn => btn.className = 'rep-tab-btn px-3.5 py-1.5 rounded-lg font-bold text-slate-600 hover:bg-slate-100');
+      document.getElementById(`rep-btn-${type}`).className = 'rep-tab-btn px-3.5 py-1.5 rounded-lg font-bold bg-gold-500 text-slate-950 shadow-sm';
+      renderReportsModule();
+    }
+
+    function renderReportsModule() {
+      const container = document.getElementById('report-output-container');
+
+      if (currentReportTab === 'mauzo') {
+        container.innerHTML = `
+          <h4 class="font-black text-xs text-navy-950 uppercase mb-2">Ripoti Kamili ya Mauzo</h4>
+          <table id="export-table" class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 border-b"><th class="p-2">Risiti</th><th class="p-2">Tarehe</th><th class="p-2">Mteja</th><th class="p-2 text-right">Jumla</th></tr>
+            </thead>
+            <tbody>
+              ${db.sales.map(s => `<tr class="border-b"><td class="p-2 font-mono">${s.receiptNo}</td><td class="p-2">${formatDate(s.date)}</td><td class="p-2">${s.customerName}</td><td class="p-2 text-right font-bold">${formatTsh(s.totalAmount)}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        `;
+      } else if (currentReportTab === 'manunuzi') {
+        container.innerHTML = `
+          <h4 class="font-black text-xs text-navy-950 uppercase mb-2">Ripoti Kamili ya Manunuzi</h4>
+          <table id="export-table" class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 border-b"><th class="p-2">Risiti #</th><th class="p-2">Tarehe</th><th class="p-2">Supplier</th><th class="p-2">Bidhaa</th><th class="p-2 text-right">Gharama</th></tr>
+            </thead>
+            <tbody>
+              ${db.purchases.map(p => `<tr class="border-b"><td class="p-2 font-mono">${p.receiptNo}</td><td class="p-2">${p.purchaseDate}</td><td class="p-2">${p.supplierName}</td><td class="p-2">${p.productName}</td><td class="p-2 text-right font-bold">${formatTsh(p.totalCost)}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        `;
+      } else if (currentReportTab === 'stock') {
+        container.innerHTML = `
+          <h4 class="font-black text-xs text-navy-950 uppercase mb-2">Ripoti ya Thamani na Hali ya Stock</h4>
+          <table id="export-table" class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 border-b"><th class="p-2">Bidhaa</th><th class="p-2">Kategoria</th><th class="p-2 text-center">Stock</th><th class="p-2 text-right">Thamani Cost</th></tr>
+            </thead>
+            <tbody>
+              ${db.products.map(p => `<tr class="border-b"><td class="p-2 font-bold">${p.name}</td><td class="p-2">${p.category}</td><td class="p-2 text-center">${p.stock} ${p.unit}</td><td class="p-2 text-right font-bold">${formatTsh(p.stock * p.costPrice)}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        `;
+      } else if (currentReportTab === 'matumizi') {
+        container.innerHTML = `
+          <h4 class="font-black text-xs text-navy-950 uppercase mb-2">Ripoti ya Matumizi ya Biashara</h4>
+          <table id="export-table" class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 border-b"><th class="p-2">Tarehe</th><th class="p-2">Kategoria</th><th class="p-2">Maelezo</th><th class="p-2 text-right">Kiasi</th></tr>
+            </thead>
+            <tbody>
+              ${db.expenses.map(e => `<tr class="border-b"><td class="p-2">${e.date}</td><td class="p-2 font-bold">${e.category}</td><td class="p-2">${e.notes || '-'}</td><td class="p-2 text-right font-bold text-red-600">${formatTsh(e.amount)}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+    }
+
+    function exportCurrentReportToExcel() {
+      const table = document.getElementById('export-table');
+      if (!table) {
+        showToast('Hakuna meza ya kureport!', 'error');
+        return;
+      }
+      const wb = XLSX.utils.table_to_book(table, { sheet: "LUWI_REPORT" });
+      XLSX.writeFile(wb, `LUWI_RIPOTI_${currentReportTab.toUpperCase()}_${getTodayString()}.xlsx`);
+      showToast('Ripoti imepakuliwa kama Excel!');
+    }
+
+    // MODULE 10: WATUMIAJI & AUDIT LOGS
+    function renderUsersAndAudit() {
+      const grid = document.getElementById('users-grid');
+      grid.innerHTML = db.users.map(u => `
+        <div class="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center gap-3 text-xs">
+          <div class="w-9 h-9 rounded-full bg-navy-950 text-gold-400 flex items-center justify-center font-bold">${u.name.charAt(0)}</div>
+          <div>
+            <p class="font-bold text-slate-900">${u.name}</p>
+            <p class="text-[10px] text-gold-700 font-semibold">${u.role}</p>
+            <p class="text-[10px] text-slate-400">Username: ${u.username}</p>
+          </div>
+        </div>
+      `).join('');
+
+      const auditBody = document.getElementById('audit-logs-body');
+      auditBody.innerHTML = db.auditLogs.map(log => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-2.5 text-slate-500">${formatDate(log.timestamp)}</td>
+          <td class="p-2.5 font-bold text-slate-900">${log.user}</td>
+          <td class="p-2.5 text-gold-700 font-semibold text-[10px]">${log.role}</td>
+          <td class="p-2.5 font-bold text-slate-800">${log.action}</td>
+          <td class="p-2.5 text-slate-600">${log.details}</td>
+        </tr>
+      `).join('');
+    }
+
+    function openUserModal() {
+      document.getElementById('user-modal').classList.remove('hidden');
+    }
+
+    function closeUserModal() {
+      document.getElementById('user-modal').classList.add('hidden');
+    }
+
+    function handleSaveUser(e) {
+      e.preventDefault();
+      const name = document.getElementById('usr-name').value.trim();
+      const username = document.getElementById('usr-username').value.trim();
+      const role = document.getElementById('usr-role').value;
+      const password = document.getElementById('usr-password').value.trim();
+
+      db.users.push({ id: `usr-${Date.now()}`, name, username, role, password });
+      logAudit('ONGEZA MTUMIAJI', `Amesajili mtumiaji mpya: ${name} (${role})`);
+      saveStateToStorage();
+      closeUserModal();
+      renderUsersAndAudit();
+      showToast('Mtumiaji mpya amesajiliwa!');
+    }
+
+    // MODULE 11: BACKUP & RESTORE JSON
+    function downloadJsonBackup() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+      const anchor = document.createElement('a');
+      anchor.setAttribute("href", dataStr);
+      anchor.setAttribute("download", `LUWI_STATIONERY_BACKUP_${getTodayString()}.json`);
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      logAudit('BACKUP DOWNLOAD', 'Amedownload nakala ya akiba ya JSON');
+      showToast('Backup imepakuliwa kikamilifu!');
+    }
+
+    function restoreJsonBackup(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const parsed = JSON.parse(ev.target.result);
+            if (parsed.products && parsed.users) {
+              db = parsed;
+              saveStateToStorage();
+              showToast('Data zote zimerejeshwa kikamilifu!');
+              onStateLoaded();
+            } else {
+              showToast('Faili lisilo sahihi!', 'error');
+            }
+          } catch (err) {
+            showToast('Kosa katika kusoma JSON backup!', 'error');
+          }
+        };
+        reader.readAsText(file);
+      }
+    }
+
+    // INITIALIZATION ON WINDOW LOAD
+    window.onload = function() {
+      loadStateFromStorage();
+      lucide.createIcons();
+    };
+  </script>
+</body>
+</html>
